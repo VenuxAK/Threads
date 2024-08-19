@@ -1,7 +1,7 @@
 <template>
   <div class="relative">
     <Navigation />
-    <main class="sm:ml-[90px] sm:w-[calc(100%-90px)] h-screen p-3">
+    <main class="sm:ml-[90px] sm:mt-12 sm:w-[calc(100%-90px)] h-screen p-3">
       <slot />
     </main>
   </div>

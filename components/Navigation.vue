@@ -1,5 +1,6 @@
 <template>
   <!-- Tablets and Desktops view -->
+  <Navbar />
   <Sidebar />
 
   <!-- Mobile Navigation -->

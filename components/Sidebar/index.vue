@@ -41,7 +41,7 @@ const items = ref([
 <template>
   <!-- Tablet and Desktop view sidebar -->
   <div
-    class="fixed top-0 left-0 w-[90px] hidden sm:block h-screen overflow-hidden z-10"
+    class="fixed top-0 left-0 w-[90px] hidden sm:block h-screen z-10"
   >
     <div class="sidebar">
       <div>
@@ -61,15 +61,7 @@ const items = ref([
           </NuxtLink>
         </div>
       </div>
-      <div>
-        <div>
-          <button
-            class="text-gray-400 hover:text-black dark:text-lightGray dark:hover:text-white transition-all"
-          >
-            <Icon name="heroicons-outline:menu-alt-2" size="25px" />
-          </button>
-        </div>
-      </div>
+      <SidebarMenu />
     </div>
   </div>
 </template>

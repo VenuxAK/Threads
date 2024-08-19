@@ -1,24 +1,19 @@
 <script lang="ts" setup>
 const route = useRoute();
-// console.log(route.path);
 </script>
 
 <template>
   <nav class="mobile-navbar">
     <div class="w-[55%] flex justify-between items-center">
       <div>
-        <Logo class="" />
+        <NuxtLink href="/">
+          <Logo />
+        </NuxtLink>
       </div>
-      <div>
-        <button
-          class="text-gray-400 hover:text-black dark:text-lightGray dark:hover:text-white transition-all"
-        >
-          <Icon name="ci:menu-alt-02" size="30px" />
-        </button>
-      </div>
+      <SidebarMenu />
     </div>
   </nav>
-  <div class="mt-16 w-full bg-white dark:bg-dark flex">
+  <div class="mt-16 sm:hidden w-full bg-white dark:bg-dark flex">
     <div class="w-[50%] text-center">
       <NuxtLink
         href="/"

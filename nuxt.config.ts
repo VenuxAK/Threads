@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     "@nuxt/icon",
     "nuxt-headlessui",
     "@nuxtjs/color-mode",
+    "@vueuse/nuxt",
   ],
   tailwindcss: {
     cssPath: ["~/assets/css/tailwind.scss", { injectPosition: "first" }],
@@ -14,6 +15,9 @@ export default defineNuxtConfig({
   },
   headlessui: {
     prefix: "Headless",
+  },
+  colorMode: {
+    preference: "system",
   },
   devServer: {
     host: ["localhost", "192.168.100.227"],
