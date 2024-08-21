@@ -30,8 +30,8 @@ const items = ref([
   },
   {
     id: 5,
-    name: "Account",
-    link: "/account",
+    name: "Profile",
+    link: "/@my-profile",
     icon: "gravity-ui:person",
     class: "mobile-menu-item",
   },

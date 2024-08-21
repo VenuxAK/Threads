@@ -30,8 +30,8 @@ const items = ref([
   },
   {
     id: 5,
-    name: "Account",
-    link: "/account",
+    name: "Profile",
+    link: "/@myprofile",
     icon: "gravity-ui:person",
     class: "menu-item",
   },
@@ -40,9 +40,7 @@ const items = ref([
 
 <template>
   <!-- Tablet and Desktop view sidebar -->
-  <div
-    class="fixed top-0 left-0 w-[90px] hidden sm:block h-screen z-10"
-  >
+  <div class="fixed top-0 left-0 w-[90px] hidden sm:block h-screen z-20">
     <div class="sidebar">
       <div>
         <NuxtLink href="/">

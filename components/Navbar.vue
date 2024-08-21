@@ -1,5 +1,16 @@
 <script lang="ts" setup>
 const route = useRoute();
+const routeName = computed(() => {
+  // route.name == "index" ? "For you" : useUseCaptitalize(route.name)
+  if (route.name == "index") {
+    return "For you";
+  } else if (route.name.startsWith("@")) {
+    return "Profile";
+  } else {
+    return useCaptitalize(route.name);
+  }
+});
+
 const items = ref([
   {
     id: 1,
@@ -32,9 +43,7 @@ const items = ref([
     >
       <div>
         <HeadlessMenuButton class="flex items-center">
-          <span class="font-semibold text-base">{{
-            route.name == "index" ? "For you" : useUseCaptitalize(route.name)
-          }}</span>
+          <span class="font-semibold text-base">{{ routeName }}</span>
           <Icon
             name="gg:chevron-down-o"
             class="-mr-1 ml-2 text-lightGray dark:text-white hover:scale-110 transition-all"
@@ -84,7 +93,7 @@ const items = ref([
 
 <style lang="scss" scoped>
 .navbar {
-  @apply w-full hidden sm:flex justify-center items-center bg-white dark:bg-dark py-3 fixed top-0;
+  @apply w-full hidden sm:flex justify-center items-center bg-white dark:bg-dark py-3 fixed top-0 z-10;
   .navbar-menu-items {
     @apply absolute top-8 left-[50%] right-[50%] translate-x-[-50%] mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white dark:bg-darkGray shadow-lg ring-1 ring-black/5 focus:outline-none px-2 py-1;
 

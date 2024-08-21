@@ -13,7 +13,12 @@ const route = useRoute();
       <SidebarMenu />
     </div>
   </nav>
-  <div class="mt-16 sm:hidden w-full bg-white dark:bg-dark flex">
+  <div
+    :class="[
+      'sm:hidden w-full bg-white dark:bg-dark flex',
+      route.path == '/' || route.path == '/following' ? 'mt-16' : 'invisible',
+    ]"
+  >
     <div class="w-[50%] text-center">
       <NuxtLink
         href="/"

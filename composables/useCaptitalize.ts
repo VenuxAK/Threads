@@ -1,4 +1,4 @@
-export const useUseCaptitalize = (str: string): string => {
+export const useCaptitalize = (str: string): string => {
   return str
     .toLowerCase()
     .split(" ")
