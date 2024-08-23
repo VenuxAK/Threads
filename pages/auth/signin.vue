@@ -1,11 +1,40 @@
+<script lang="ts" setup>
+definePageMeta({
+  layout: "auth",
+  middleware: "sanctum:guest",
+});
+
+const { login } = useSanctumAuth();
+const credentials = ref<Object | null>({
+  email: "",
+  password: "",
+});
+const error = ref<Object | null>(null);
+let loading = ref<boolean>(false);
+
+const onSignIn = async () => {
+  try {
+    loading.value = true;
+    error.value = null;
+    await login(credentials.value);
+    loading.value = false;
+    navigateTo("/");
+  } catch (err) {
+    loading.value = false;
+    const _error = useApiError(err);
+    if (_error.isValidationError) {
+      error.value = _error.bag;
+    }
+  }
+};
+</script>
+
 <template>
   <div class="font-[sans-serif]">
     <div class="w-full sm:w-[400px] mx-auto">
-      <form class="p-6 mx-auto auth-form">
+      <form @submit.prevent="onSignIn" class="p-6 mx-auto auth-form">
         <div class="mb-12">
-          <h3 class="text-gray-800 dark:text-white text-4xl font-extrabold">
-            Sign in
-          </h3>
+          <h3 class="form-title">Sign in</h3>
           <p class="text-gray-800 dark:text-white text-sm mt-6">
             Don't have an account
             <NuxtLink
@@ -18,29 +47,25 @@
 
         <!-- Email -->
         <div class="mt-8">
-          <label class="form-label">Email</label>
-          <div class="relative flex items-center">
-            <input type="text" class="form-input" placeholder="Enter email" />
-            <Icon name="lucide:mail" size="20" class="input-icon" />
-          </div>
+          <FormInput
+            v-model="credentials.email"
+            type="email"
+            label="Email"
+            placeholder="Enter email"
+            icon="lucide:mail"
+          />
+          <FormErrorMessage :error="error?.email?.[0]" />
         </div>
 
         <!-- Password -->
-        <div class="mt-8">
-          <label class="form-label">Password</label>
-          <div class="relative flex items-center">
-            <input
-              :type="showPassword ? 'text' : 'password'"
-              class="form-input"
-              placeholder="Enter password"
-            />
-            <Icon
-              name="mingcute:eye-2-line"
-              size="25"
-              class="input-icon cursor-pointer"
-              @click="togglePasswordHideShow"
-            />
-          </div>
+        <div class="mt-4">
+          <FormInput
+            v-model="credentials.password"
+            type="password"
+            label="Password"
+            placeholder="Enter password"
+          />
+          <FormErrorMessage :error="error?.password?.[0]" />
         </div>
 
         <!-- Remember me and forgot password -->
@@ -48,7 +73,6 @@
           <div class="flex items-center">
             <input
               id="remember-me"
-              name="remember-me"
               type="checkbox"
               class="h-4 w-4 shrink-0 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
@@ -71,7 +95,7 @@
 
         <!-- Sign in button -->
         <div class="mt-8">
-          <button type="button" class="signin-btn">Sign in</button>
+          <Button :loading="loading">Sign in</Button>
         </div>
 
         <div class="my-4 flex items-center gap-4">
@@ -80,35 +104,25 @@
           <hr class="w-full border-gray-300 dark:border-gray-600" />
         </div>
 
-        <!-- Sigin in with social account -->
+        <!-- Connect with social account -->
         <div class="space-y-3">
-          <button type="button" class="social-signin-btn">
-            <Icon name="flat-color-icons:google" size="25" />
+          <FormSocialLink icon="flat-color-icons:google">
             Continue with Google
-          </button>
-          <button type="button" class="social-signin-btn">
-            <Icon name="logos:facebook" size="25" />
+          </FormSocialLink>
+          <FormSocialLink icon="logos:facebook">
             Continue with Facebook
-          </button>
-          <button type="button" class="social-signin-btn">
-            <Icon name="skill-icons:instagram" size="25" />
+          </FormSocialLink>
+          <FormSocialLink icon="skill-icons:instagram">
             Continue with Instagram
-          </button>
+          </FormSocialLink>
         </div>
       </form>
     </div>
   </div>
 </template>
 
-<script lang="ts" setup>
-definePageMeta({
-  layout: "auth",
-});
-
-let showPassword = ref(false);
-const togglePasswordHideShow = () => {
-  showPassword.value = !showPassword.value;
-};
-</script>
-
-<style scoped></style>
+<style lang="scss">
+.form-title {
+  @apply text-gray-800 dark:text-white text-4xl font-extrabold;
+}
+</style>

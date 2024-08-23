@@ -1,3 +1,21 @@
+<script lang="ts" setup>
+const router = useRouter();
+const { logout } = useSanctumAuth();
+const { width, height } = useWindowSize();
+let isApperenceOpen = ref(false);
+
+const handleClose = (close, link = null) => {
+  close();
+  if (link) {
+    router.push(link);
+  }
+};
+
+const onLogout = async () => {
+  await logout();
+};
+</script>
+
 <template>
   <HeadlessMenu as="div" class="relative inline-block text-left">
     <div>
@@ -55,7 +73,15 @@
         </div>
         <div class="p-1">
           <HeadlessMenuItem v-slot="{ active, close }">
-            <button class="menu-item" @click="handleClose(close)">
+            <button
+              class="menu-item"
+              @click="
+                () => {
+                  close();
+                  onLogout();
+                }
+              "
+            >
               Logout
             </button>
           </HeadlessMenuItem>
@@ -69,19 +95,6 @@
     />
   </HeadlessMenu>
 </template>
-
-<script lang="ts" setup>
-const router = useRouter();
-const { width, height } = useWindowSize();
-let isApperenceOpen = ref(false);
-
-const handleClose = (close, link = null) => {
-  close();
-  if (link) {
-    router.push(link);
-  }
-};
-</script>
 
 <style lang="scss" scoped>
 .menu-items {

@@ -1,5 +1,9 @@
 <script lang="ts" setup>
-const route = useRoute();
+definePageMeta({
+  middleware: "sanctum:auth",
+});
+
+const user = useSanctumUser<any>();
 
 let tab = ref("posts");
 const toggleTab = (_tab: string) => {
@@ -12,13 +16,13 @@ const toggleTab = (_tab: string) => {
 </script>
 
 <template>
-  <div class="sm:p-6">
+  <div class="sm:p-6" v-if="user">
     <div class="p-3 sm:p-0">
       <!-- User name and avatar -->
       <div class="flex justify-between items-center">
         <div>
-          <h3 class="font-bold text-lg sm:text-xl">Full name</h3>
-          <h5 class="dark:text-white/70">username</h5>
+          <h3 class="font-bold text-lg sm:text-xl">{{ user.fullname }}</h3>
+          <h5 class="dark:text-white/70">{{ user.username }}</h5>
         </div>
         <div>
           <button>
@@ -32,21 +36,28 @@ const toggleTab = (_tab: string) => {
         <div class="flex justify-between items-center">
           <div class="space-y-2">
             <div>
-              <p>bio...</p>
+              <p :class="user.bio ? 'visible' : 'invisible'">
+                {{ user.bio ?? "Bio..." }}
+              </p>
             </div>
             <div class="flex items-center space-x-3 text-sm">
               <div>
-                <button class="hover:underline">12k followers</button>
+                <button class="hover:underline">
+                  {{ user.followes ?? 0 }} followers
+                </button>
               </div>
               <div>
-                <button class="hover:underline">205 following</button>
+                <button class="hover:underline">
+                  {{ user.following ?? 0 }} following
+                </button>
               </div>
             </div>
           </div>
-          <div>
+
+          <!-- Add social link feature later -->
+          <!-- <div>
             <div class="space-x-1 flex justify-end items-center">
               <button class="social-btn">
-                <!-- <Icon name="mdi:instagram" size="20" /> -->
                 <Icon name="skill-icons:instagram" size="20" />
               </button>
               <button class="social-btn text-blue-600">
@@ -59,7 +70,7 @@ const toggleTab = (_tab: string) => {
                 <Icon name="fa6-solid:plus" size="20" class="" />
               </button>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -73,8 +84,9 @@ const toggleTab = (_tab: string) => {
       </div>
     </div>
 
+    <!-- Posts, Reposts toggler tab -->
     <div>
-      <div class="border-b dark:border-white/10 mt-8">
+      <div class="border-b dark:border-white/10">
         <div class="btn-tabs">
           <button
             :class="['tab-btn', tab == 'posts' ? 'active-tab' : '']"
@@ -92,8 +104,8 @@ const toggleTab = (_tab: string) => {
       </div>
 
       <div class="mt-6">
-        <ProfilePostsList v-if="tab == 'posts'" v-for="i in 5" :key="i" />
-        <ProfileRepostsList v-if="tab == 'reposts'" />
+        <ProfilePostsList :posts="user.posts" v-if="tab == 'posts'" />
+        <ProfileRepostsList :posts="user.reposts" v-if="tab == 'reposts'" />
       </div>
     </div>
   </div>

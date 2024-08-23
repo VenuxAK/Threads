@@ -1,3 +1,9 @@
+<script setup lang="ts">
+definePageMeta({
+  middleware: "sanctum:auth",
+});
+</script>
+
 <template>
   <div class="space-y-6">
     <Card class="hidden sm:block border-none">
@@ -38,8 +44,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts"></script>
 
 <style lang="scss">
 .page-title {
