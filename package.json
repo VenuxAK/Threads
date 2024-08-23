@@ -10,13 +10,35 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@formkit/auto-animate": "^0.8.2",
     "@nuxt/icon": "^1.4.5",
+    "@nuxtjs/color-mode": "^3.4.4",
     "@nuxtjs/tailwindcss": "^6.12.1",
+    "@vueuse/core": "^11.0.1",
     "nuxt": "^3.12.4",
+    "nuxt-auth-sanctum": "^0.4.6",
     "nuxt-headlessui": "^1.2.0",
     "vue": "latest"
   },
   "devDependencies": {
+    "@iconify-json/akar-icons": "^1.1.26",
+    "@iconify-json/ant-design": "^1.1.17",
+    "@iconify-json/ci": "^1.1.14",
+    "@iconify-json/fa6-solid": "^1.1.24",
+    "@iconify-json/gg": "^1.1.10",
+    "@iconify-json/gravity-ui": "^1.1.5",
+    "@iconify-json/heroicons-outline": "^1.1.11",
+    "@iconify-json/iconamoon": "^1.1.5",
+    "@iconify-json/lucide": "^1.1.207",
+    "@iconify-json/maki": "^1.1.25",
+    "@iconify-json/mdi": "^1.1.68",
+    "@iconify-json/mingcute": "^1.1.19",
+    "@iconify-json/ph": "^1.1.14",
+    "@iconify-json/prime": "^1.1.13",
+    "@iconify-json/ri": "^1.1.22",
+    "@iconify-json/solar": "^1.1.10",
+    "@iconify-json/teenyicons": "^1.1.10",
+    "@vueuse/nuxt": "^11.0.1",
     "sass": "^1.77.8"
   }
 }
