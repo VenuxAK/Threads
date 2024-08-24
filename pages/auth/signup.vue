@@ -4,8 +4,12 @@ definePageMeta({
   middleware: "sanctum:guest",
 });
 
-const client = useSanctumClient();
-const credentials = ref<Object | null>({
+type SignUpUser = {
+  fullname: string;
+  email: string;
+  password: string;
+};
+const credentials = ref<SignUpUser>({
   fullname: "",
   email: "",
   password: "",
@@ -13,23 +17,21 @@ const credentials = ref<Object | null>({
 const error = ref<Object | null>(null);
 let loading = ref<boolean>(false);
 
+const { signUp } = useAuth();
 const onSignUp = async () => {
   try {
     loading.value = true;
     error.value = null;
-    await client("/register", {
-      method: "POST",
-      body: credentials.value,
-    });
+    await signUp(
+      credentials.value.fullname,
+      credentials.value.email,
+      credentials.value.password
+    );
     loading.value = false;
-    const _user = await client("/api/user");
     navigateTo("/");
-  } catch (err) {
+  } catch (err: any) {
     loading.value = false;
-    const _error = useApiError(err);
-    if (_error.isValidationError) {
-      error.value = _error.bag;
-    }
+    error.value = err;
   }
 };
 </script>

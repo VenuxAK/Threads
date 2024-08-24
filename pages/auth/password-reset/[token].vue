@@ -3,11 +3,13 @@ definePageMeta({
   layout: "auth",
   middleware: "sanctum:guest",
 });
-const route = useRoute();
-const client = useSanctumClient();
-const token = route.params.token;
-const email = route.query.email;
-const credentials = ref<Object | null>({
+const { resetPassword } = useAuth();
+
+type UserCredentials = {
+  password: string;
+  password_confirmation: string;
+};
+const credentials = ref<UserCredentials>({
   password: "",
   password_confirmation: "",
 });
@@ -18,23 +20,17 @@ const isReset = ref<boolean>(false);
 const onResetPassword = async () => {
   try {
     loading.value = true;
-    await client("/reset-password", {
-      method: "POST",
-      body: {
-        email,
-        token,
-        ...credentials.value,
-      },
-    });
+    error.value = null;
+    await resetPassword(
+      credentials.value.password,
+      credentials.value.password_confirmation
+    );
     loading.value = false;
     isReset.value = true;
-  } catch (err) {
+  } catch (err: any) {
     loading.value = false;
     isReset.value = false;
-    const _error = useApiError(err);
-    if (_error.isValidationError) {
-      error.value = _error.bag;
-    }
+    error.value = err;
   }
 };
 </script>

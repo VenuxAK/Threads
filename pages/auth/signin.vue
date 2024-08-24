@@ -4,8 +4,12 @@ definePageMeta({
   middleware: "sanctum:guest",
 });
 
-const { login } = useSanctumAuth();
-const credentials = ref<Object | null>({
+const { signIn } = useAuth();
+type SignInUser = {
+  email: string;
+  password: string;
+};
+const credentials = ref<SignInUser>({
   email: "",
   password: "",
 });
@@ -16,15 +20,12 @@ const onSignIn = async () => {
   try {
     loading.value = true;
     error.value = null;
-    await login(credentials.value);
+    await signIn(credentials.value);
     loading.value = false;
     navigateTo("/");
-  } catch (err) {
+  } catch (err: any) {
     loading.value = false;
-    const _error = useApiError(err);
-    if (_error.isValidationError) {
-      error.value = _error.bag;
-    }
+    error.value = err;
   }
 };
 </script>
@@ -52,7 +53,7 @@ const onSignIn = async () => {
             type="email"
             label="Email"
             placeholder="Enter email"
-            icon="lucide:mail"
+            icon="w"
           />
           <FormErrorMessage :error="error?.email?.[0]" />
         </div>

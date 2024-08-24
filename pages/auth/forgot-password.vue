@@ -4,32 +4,23 @@ definePageMeta({
   middleware: "sanctum:guest",
 });
 
-const client = useSanctumClient();
-const email = ref<String>("");
+const { forgotPassword } = useAuth();
+const email = ref<string>("");
 const error = ref<Object | null>(null);
-const success = ref<String>("");
+const success = ref<string>("");
 const loading = ref<boolean>(false);
 
 const onForgotPasswordSubmit = async () => {
   try {
     loading.value = true;
-    await client("/forgot-password", {
-      method: "POST",
-      body: {
-        email: email.value,
-      },
-    });
-    loading.value = false;
     error.value = null;
+    await forgotPassword(email.value);
+    loading.value = false;
     success.value =
       "We have sent a link to reset password. Please check your mail box";
-  } catch (err) {
+  } catch (err: any) {
     loading.value = false;
-    success.value = "";
-    const _error = useApiError(err);
-    if (_error.isValidationError) {
-      error.value = _error.bag;
-    }
+    error.value = err;
   }
 };
 </script>
