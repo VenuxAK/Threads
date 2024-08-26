@@ -1,3 +1,24 @@
+<script lang="ts" setup>
+definePageMeta({
+  layout: "auth",
+});
+
+const email = ref<string>("");
+const error = ref<Object | null>(null);
+const success = ref<string>("");
+const loading = ref<boolean>(false);
+
+const onForgotPasswordSubmit = async () => {
+  loading.value = true;
+  const { isPending, start, stop } = useTimeoutFn(() => {
+    console.log(email.value);
+    loading.value = false;
+    success.value =
+      "We have sent a link to reset password. Please check your mail box";
+  }, 3000);
+};
+</script>
+
 <template>
   <section class="">
     <div
@@ -19,54 +40,31 @@
           Forgot your password?
         </h1>
 
-        <form class="mt-4 space-y-4 lg:mt-5 md:space-y-5">
+        <form
+          @submit.prevent="onForgotPasswordSubmit"
+          class="mt-4 space-y-4 lg:mt-5 md:space-y-5 auth-form"
+        >
           <div>
-            <label
-              for="email"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >Your email</label
-            >
-            <input
+            <FormInput
+              v-model="email"
               type="email"
-              id="email"
-              class="forgot-password-input"
-              placeholder="name@company.com"
+              label="Your email"
+              placeholder="Enter your email"
+              icon="lucide:mail"
             />
+            <FormErrorMessage :error="error" />
           </div>
-          <div class="flex items-start">
-            <div class="flex items-center h-5">
-              <input
-                id="terms"
-                aria-describedby="terms"
-                type="checkbox"
-                class="forgot-password-checkbox"
-              />
-            </div>
-            <div class="ml-3 text-sm">
-              <label
-                for="terms"
-                class="font-light text-gray-500 dark:text-gray-300"
-                >I accept the
-                <a
-                  class="font-medium text-primary-600 hover:underline dark:text-primary-500"
-                  href="#"
-                  >Terms and Conditions</a
-                ></label
-              >
-            </div>
-          </div>
-          <button type="submit" class="signin-btn">Reset password</button>
+          <p v-if="success" :class="['text-green-600 font-bold text-sm']">
+            {{ success }}
+          </p>
+
+          <Button v-if="!success" :loading="loading"> Reset password </Button>
+          <Button v-else href="/signin">Back</Button>
         </form>
       </div>
     </div>
   </section>
 </template>
-
-<script lang="ts" setup>
-definePageMeta({
-  layout: "auth",
-});
-</script>
 
 <style lang="scss" scoped>
 .forgot-password-input {

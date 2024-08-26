@@ -1,11 +1,37 @@
+<script lang="ts" setup>
+definePageMeta({
+  layout: "auth",
+});
+
+type SignUpUser = {
+  name: string;
+  email: string;
+  password: string;
+};
+
+const credentials = ref<SignUpUser>({
+  name: "",
+  email: "",
+  password: "",
+});
+const error = ref<Object | null>(null);
+let loading = ref<boolean>(false);
+
+const onSignUp = async () => {
+  loading.value = true;
+  const {} = useTimeoutFn(() => {
+    console.log(credentials.value);
+    loading.value = false;
+  }, 3000);
+};
+</script>
+
 <template>
   <div class="font-[sans-serif]">
     <div class="w-full sm:w-[400px] mx-auto">
-      <form class="p-6 mx-auto auth-form">
+      <form @submit.prevent="onSignUp" class="p-6 mx-auto auth-form">
         <div class="mb-12">
-          <h3 class="text-gray-800 dark:text-white text-4xl font-extrabold">
-            Sign up
-          </h3>
+          <h3 class="form-title">Sign up</h3>
           <p class="text-gray-800 dark:text-white text-sm mt-6">
             Already have an account
             <NuxtLink
@@ -18,58 +44,41 @@
 
         <!-- Name -->
         <div>
-          <label class="form-label">Name</label>
-          <div class="relative flex items-center">
-            <input
-              name="email"
-              type="text"
-              required
-              class="form-input"
-              placeholder="Enter your name"
-            />
-            <Icon
-              name="bi:person"
-              size="25"
-              class="absolute right-2 text-gray-400"
-            />
-          </div>
+          <FormInput
+            label="Name"
+            v-model="credentials.name"
+            placeholder="Enter your name"
+            icon="bi:person"
+          />
+          <FormErrorMessage :error="error" />
         </div>
 
         <!-- Email -->
-        <div class="mt-8">
-          <label class="form-label">Email</label>
-          <div class="relative flex items-center">
-            <input type="text" class="form-input" placeholder="Enter email" />
-            <Icon name="lucide:mail" size="20" class="input-icon" />
-          </div>
+        <div class="my-3">
+          <FormInput
+            v-model="credentials.email"
+            type="email"
+            label="Email"
+            placeholder="Enter email"
+            icon="lucide:mail"
+          />
+          <FormErrorMessage :error="error" />
         </div>
 
         <!-- Password -->
-        <div class="mt-8">
-          <label class="form-label">Password</label>
-          <div class="relative flex items-center">
-            <input
-              :type="showPassword ? 'text' : 'password'"
-              class="form-input"
-              placeholder="Enter password"
-            />
-            <Icon
-              name="mingcute:eye-2-line"
-              size="25"
-              class="input-icon cursor-pointer"
-              @click="togglePasswordHideShow"
-            />
-          </div>
+        <div class="">
+          <FormInput
+            v-model="credentials.password"
+            label="Password"
+            type="password"
+            placeholder="Enter password"
+          />
+          <FormErrorMessage :error="error" />
         </div>
 
         <!-- Sign up button -->
         <div class="mt-8">
-          <button
-            type="button"
-            class="w-full py-2.5 px-5 text-sm tracking-wide rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
-          >
-            Sign up
-          </button>
+          <Button :loading="loading">Sign up</Button>
         </div>
 
         <div class="my-4 flex items-center gap-4">
@@ -78,34 +87,21 @@
           <hr class="w-full border-gray-300 dark:border-gray-600" />
         </div>
 
+        <!-- Connect with social account -->
         <div class="space-y-3">
-          <button type="button" class="social-signin-btn">
-            <Icon name="flat-color-icons:google" size="25" />
+          <FormSocialLink icon="flat-color-icons:google">
             Continue with Google
-          </button>
-          <button type="button" class="social-signin-btn">
-            <Icon name="logos:facebook" size="25" />
+          </FormSocialLink>
+          <FormSocialLink icon="logos:facebook">
             Continue with Facebook
-          </button>
-          <button type="button" class="social-signin-btn">
-            <Icon name="skill-icons:instagram" size="25" />
+          </FormSocialLink>
+          <FormSocialLink icon="skill-icons:instagram">
             Continue with Instagram
-          </button>
+          </FormSocialLink>
         </div>
       </form>
     </div>
   </div>
 </template>
 
-<script lang="ts" setup>
-definePageMeta({
-  layout: "auth",
-});
-
-let showPassword = ref(false);
-const togglePasswordHideShow = () => {
-  showPassword.value = !showPassword.value;
-};
-</script>
-
-<style scoped></style>
+<style></style>
