@@ -9,6 +9,14 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "@vueuse/nuxt",
   ],
+  app: {
+    pageTransition: { name: "page", mode: "out-in" },
+  },
+  router: {
+    options: {
+      // scrollBehaviorType: "smooth",
+    },
+  },
   tailwindcss: {
     cssPath: ["~/assets/css/tailwind.scss", { injectPosition: "first" }],
     configPath: "tailwind.config.ts",

@@ -11,8 +11,20 @@ const indicator = ref({
   <NuxtLoadingIndicator :height="indicator.height" :color="indicator.color" />
   <NuxtLayout>
     <NuxtPage />
-    <div class="my-24 invisible">
+    <!-- <div class="my-24 invisible">
       &copy; Copyrights 2024. All Rights Reserved
-    </div>
+    </div> -->
   </NuxtLayout>
 </template>
+
+<style>
+.page-enter-active,
+.page-leave-active {
+  transition: all 300ms;
+}
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  filter: blur(1rem);
+}
+</style>

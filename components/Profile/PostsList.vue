@@ -8,9 +8,7 @@
       </PostCard>
     </div>
   </div>
-  <div v-else class="text-center text-gray-700 dark:text-gray-400">
-    No posts yet
-  </div>
+  <LoaderSkeleton v-for="i in 2" :loading="false" />
 </template>
 
 <script lang="ts" setup>
