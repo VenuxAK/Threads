@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     "nuxt-headlessui",
     "@nuxtjs/color-mode",
     "@vueuse/nuxt",
+    "nuxt-auth-sanctum",
   ],
   app: {
     pageTransition: { name: "page", mode: "out-in" },
@@ -29,5 +30,18 @@ export default defineNuxtConfig({
   },
   devServer: {
     host: ["localhost", "192.168.100.227"],
+  },
+  sanctum: {
+    baseUrl: "http://localhost:8000",
+    endpoints: {
+      login: "/auth/login",
+      logout: "/auth/logout",
+      user: "/api/user",
+    },
+    redirect: {
+      onLogin: false,
+      onLogout: "/signin",
+      onGuestOnly: "/",
+    },
   },
 });

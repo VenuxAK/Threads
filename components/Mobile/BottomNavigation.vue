@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+const user = useSanctumUser();
 const items = ref([
   {
     id: 1,
@@ -31,7 +32,7 @@ const items = ref([
   {
     id: 5,
     name: "Profile",
-    link: "/@my-profile",
+    link: `/@${user.value.username}`,
     icon: "gravity-ui:person",
     class: "mobile-menu-item",
   },

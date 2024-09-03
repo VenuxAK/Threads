@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-definePageMeta({});
+definePageMeta({
+  middleware: "sanctum:auth",
+});
 
 const user = ref<any>({
   name: "ArKar Minn",
@@ -14,13 +16,6 @@ const toggleTab = (_tab: string) => {
     tab.value = "reposts";
   }
 };
-
-// const loading = ref(true);
-// onMounted(async () => {
-//   setTimeout(() => {
-//     loading.value = false;
-//   }, 3000);
-// });
 </script>
 
 <template>

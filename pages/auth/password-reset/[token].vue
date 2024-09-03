@@ -1,7 +1,12 @@
 <script lang="ts" setup>
 definePageMeta({
   layout: "auth",
+  middleware: "sanctum:guest",
+  alias: "/password-reset/:token",
 });
+
+const { resetPassword } = useAuth();
+const route = useRoute();
 
 type UserCredentials = {
   password: string;
@@ -15,14 +20,24 @@ const credentials = ref<UserCredentials>({
 const error = ref<any>(null);
 const loading = ref<boolean>(false);
 const isReset = ref<boolean>(false);
-
+const email = route.query.email;
+const token = route.params.token;
 const onResetPassword = async () => {
-  loading.value = true;
-  const { isPending, start, stop } = useTimeoutFn(() => {
-    console.log(credentials.value);
+  try {
+    loading.value = true;
+    error.value = null;
+    await resetPassword(
+      email,
+      credentials.value.password,
+      credentials.value.password_confirmation,
+      token
+    );
     loading.value = false;
     isReset.value = true;
-  }, 3000);
+  } catch (err: any) {
+    loading.value = false;
+    error.value = err;
+  }
 };
 </script>
 
@@ -45,7 +60,7 @@ const onResetPassword = async () => {
         </div>
         <div class="mt-5">
           <form @submit.prevent="onResetPassword" class="auth-form">
-            <FormErrorMessage :error="error" />
+            <FormErrorMessage :error="error?.email?.[0]" />
             <div>
               <FormInput
                 v-model="credentials.password"
@@ -53,7 +68,7 @@ const onResetPassword = async () => {
                 label="New password"
                 placeholder="********"
               />
-              <FormErrorMessage :error="error" />
+              <FormErrorMessage :error="error?.password?.[0]" />
             </div>
             <div class="mt-5">
               <FormInput
@@ -62,7 +77,7 @@ const onResetPassword = async () => {
                 label="Confirm new password"
                 placeholder="********"
               />
-              <FormErrorMessage :error="error" />
+              <FormErrorMessage :error="error?.password_confirmation?.[0]" />
             </div>
             <div>
               <Button :loading="loading">Reset Password</Button>

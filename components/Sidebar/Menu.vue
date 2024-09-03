@@ -55,8 +55,16 @@
         </div>
         <div class="p-1">
           <HeadlessMenuItem v-slot="{ active, close }">
-            <button class="menu-item" @click="handleClose(close)">
-              Logout
+            <button
+              class="menu-item"
+              @click="
+                () => {
+                  onSignOut();
+                  handleClose(close);
+                }
+              "
+            >
+              Sign out
             </button>
           </HeadlessMenuItem>
         </div>
@@ -74,6 +82,11 @@
 const router = useRouter();
 const { width, height } = useWindowSize();
 let isApperenceOpen = ref(false);
+const { signOut } = useAuth();
+
+const onSignOut = async () => {
+  await signOut();
+};
 
 const handleClose = (close, link = null) => {
   close();

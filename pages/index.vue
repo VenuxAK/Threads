@@ -1,4 +1,7 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: "sanctum:auth",
+});
 const loading = ref(true);
 const posts = ref([]);
 

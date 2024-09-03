@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 definePageMeta({
   layout: "auth",
+  middleware: "sanctum:guest",
+  alias: "/signin",
 });
 
 type SignInUser = {
@@ -8,6 +10,7 @@ type SignInUser = {
   password: string;
 };
 
+const { signIn } = useAuth();
 const credentials = ref<SignInUser>({
   email: "",
   password: "",
@@ -16,11 +19,20 @@ const error = ref<Object | null>(null);
 let loading = ref<boolean>(false);
 
 const onSignIn = async () => {
-  loading.value = true;
-  const { isPending, start, stop } = useTimeoutFn(() => {
-    console.log(credentials.value);
+  try {
+    loading.value = true;
+    await signIn(credentials.value.email, credentials.value.password);
     loading.value = false;
-  }, 3000);
+    error.value = null;
+  } catch (err: any) {
+    loading.value = false;
+    error.value = err;
+  }
+  // loading.value = true;
+  // const { isPending, start, stop } = useTimeoutFn(() => {
+  //   console.log(credentials.value);
+  //   loading.value = false;
+  // }, 3000);
 };
 </script>
 
@@ -49,7 +61,7 @@ const onSignIn = async () => {
             placeholder="Enter email"
             icon="lucide:mail"
           />
-          <FormErrorMessage :error="error" />
+          <FormErrorMessage :error="error?.email?.[0]" />
         </div>
 
         <!-- Password -->
@@ -60,7 +72,7 @@ const onSignIn = async () => {
             label="Password"
             placeholder="Enter password"
           />
-          <FormErrorMessage :error="error" />
+          <FormErrorMessage :error="error?.password?.[0]" />
         </div>
 
         <!-- Remember me and forgot password -->

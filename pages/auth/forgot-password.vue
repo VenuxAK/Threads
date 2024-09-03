@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 definePageMeta({
   layout: "auth",
+  middleware: "sanctum:guest",
+  alias: "/forgot-password",
 });
 
 const email = ref<string>("");
@@ -8,14 +10,19 @@ const error = ref<Object | null>(null);
 const success = ref<string>("");
 const loading = ref<boolean>(false);
 
-const onForgotPasswordSubmit = async () => {
-  loading.value = true;
-  const { isPending, start, stop } = useTimeoutFn(() => {
-    console.log(email.value);
+const { forgotPassword } = useAuth();
+
+const onForgotPassword = async () => {
+  try {
+    loading.value = true;
+    error.value = null;
+    await forgotPassword(email.value);
+    success.value = "We have sent password reset link to your mail box";
     loading.value = false;
-    success.value =
-      "We have sent a link to reset password. Please check your mail box";
-  }, 3000);
+  } catch (err: any) {
+    loading.value = false;
+    error.value = err;
+  }
 };
 </script>
 
@@ -41,7 +48,7 @@ const onForgotPasswordSubmit = async () => {
         </h1>
 
         <form
-          @submit.prevent="onForgotPasswordSubmit"
+          @submit.prevent="onForgotPassword"
           class="mt-4 space-y-4 lg:mt-5 md:space-y-5 auth-form"
         >
           <div>
@@ -52,7 +59,7 @@ const onForgotPasswordSubmit = async () => {
               placeholder="Enter your email"
               icon="lucide:mail"
             />
-            <FormErrorMessage :error="error" />
+            <FormErrorMessage :error="error?.email?.[0]" />
           </div>
           <p v-if="success" :class="['text-green-600 font-bold text-sm']">
             {{ success }}
