@@ -6,7 +6,8 @@ const props = defineProps({
   },
 });
 const emit = defineEmits(["closeModal", "openModal"]);
-// const isOpen = ref(true);
+const user = useSanctumUser();
+const content = ref("");
 
 function closeModal() {
   emit("closeModal");
@@ -14,6 +15,17 @@ function closeModal() {
 function openModal() {
   emit("openModal");
 }
+const { createPost } = usePost();
+const error = ref(null);
+const onCreatePost = async () => {
+  try {
+    await createPost(content.value);
+    error.value = null;
+    emit("closeModal");
+  } catch (err) {
+    error.value = err;
+  }
+};
 </script>
 
 <template>
@@ -52,21 +64,30 @@ function openModal() {
                 <div class="flex flex-col space-y-6">
                   <div class="flex space-x-5 items-start">
                     <div class="">
-                      <Avatar class="w-10" />
+                      <NuxtLink :href="`/@${user.username}`">
+                        <Avatar class="w-10" />
+                      </NuxtLink>
                     </div>
                     <div class="flex-1">
-                      <p>username</p>
+                      <NuxtLink
+                        :href="`/@${user.username}`"
+                        class="font-bold text-sm"
+                      >
+                        <p>{{ user.username }}</p>
+                      </NuxtLink>
                       <div>
                         <form class="">
                           <div>
-                            <input
+                            <textarea
                               type="text"
                               class="bg-transparent w-full text-sm text-gray-800 dark:text-white pr-2 pb-2 outline-none"
                               placeholder="Start a thread..."
-                              name="thread"
-                              autofocus="thread"
+                              v-model="content"
                             />
                           </div>
+                          <p class="text-red-600 font-semibold text-sm">
+                            {{ error?.content?.[0] }}
+                          </p>
                         </form>
                       </div>
                       <div class="flex space-x-6 mt-4">
@@ -100,8 +121,15 @@ function openModal() {
                       </div>
                     </div>
                   </div>
-                  <div>
-                    <p>Anyone can reply</p>
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p>Anyone can reply</p>
+                    </div>
+                    <div>
+                      <button @click="onCreatePost" class="btn-create">
+                        Post
+                      </button>
+                    </div>
                   </div>
                 </div>
               </HeadlessDialogPanel>

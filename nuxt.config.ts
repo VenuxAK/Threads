@@ -42,6 +42,7 @@ export default defineNuxtConfig({
       onLogin: false,
       onLogout: "/signin",
       onGuestOnly: "/",
+      onAuthOnly: "/signin"
     },
   },
 });

@@ -1,14 +1,16 @@
 <template>
   <div v-if="posts">
     <div>
-      <PostCard>
-        <div class="content">
-          <h1>My first thread</h1>
-        </div>
+      <PostCard :post="post" v-for="post in posts" :key="post">
+        <NuxtLink :href="`/@${post.author.username}/posts/${post.id}`">
+          <div class="content">
+            {{ post.content }}
+          </div>
+        </NuxtLink>
       </PostCard>
     </div>
   </div>
-  <LoaderSkeleton v-for="i in 2" :loading="false" />
+  <LoaderSkeleton v-for="i in 2" :loading="!posts.length" />
 </template>
 
 <script lang="ts" setup>

@@ -1,20 +1,21 @@
 <script lang="ts" setup>
-// const showReplied = define;
 const { showReplied } = defineProps({
-  showReplied: {
-    default: false,
-  },
   post: {
     required: true,
+  },
+  showReplied: {
+    default: false,
   },
 });
 </script>
 
 <template>
-  <Card class="post-card" post="post">
+  <Card class="post-card" v-if="post">
     <PostHeader :post="post" />
     <div class="card-content">
-      <slot />
+      <NuxtLink :href="`/@${post.author.username}/posts/${post.id}`">
+        <div>{{ post.content }}</div>
+      </NuxtLink>
     </div>
     <PostFooter />
     <PostReplied v-if="showReplied" />

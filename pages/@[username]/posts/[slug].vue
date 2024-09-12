@@ -2,17 +2,14 @@
 definePageMeta({
   middleware: "sanctum:auth",
 });
+const route = useRoute();
+const { getPost } = usePost();
+const post = ref(null);
+post.value = await getPost(route.params.slug);
 </script>
 <template>
   <div>
-    <PostCard>
-      <div class="content">
-        <div class="content">
-          <p>Post content</p>
-          <!-- <div>post's images</div> -->
-        </div>
-      </div>
-    </PostCard>
+    <Post :post="post" />
   </div>
 </template>
 

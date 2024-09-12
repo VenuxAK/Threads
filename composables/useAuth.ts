@@ -2,6 +2,11 @@ export const useAuth = () => {
   const client = useSanctumClient();
   const { login, logout, refreshIdentity } = useSanctumAuth();
 
+  const user = computed(() => {
+    const _user: any = useSanctumUser();
+    return _user.value.user;
+  });
+
   const signUp = async (name: string, email: string, password: string) => {
     try {
       await client("/auth/register", {
@@ -78,5 +83,25 @@ export const useAuth = () => {
   const verifyEmail = async () => {};
   const notifyEmailVerification = async () => {};
 
-  return { signUp, signIn, signOut, forgotPassword, resetPassword };
+  const fetchUserPosts = async () => {
+    try {
+      const response = await client("/api/user/posts");
+      return response.posts;
+    } catch (err) {
+      const error = useApiError(err);
+      if (error.isValidationError || error.isNotFoundError) {
+        throw error.bag;
+      }
+    }
+  };
+
+  return {
+    user,
+    fetchUserPosts,
+    signUp,
+    signIn,
+    signOut,
+    forgotPassword,
+    resetPassword,
+  };
 };

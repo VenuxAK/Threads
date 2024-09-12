@@ -3,6 +3,7 @@ import { FetchError } from "ofetch";
 const UNKNOWN_ERROR_CODE = 400;
 const UNAUTHORIZE_ERROR_CODE = 401;
 const FORBIDDEN_ERROR_CODE = 403;
+const NOT_FOUND_ERROR_CODE = 404;
 const VALIDATION_ERROR_CODE = 422;
 const SERVER_ERROR_CODE = 500;
 
@@ -14,6 +15,8 @@ export const useApiError = (error: any) => {
     isFetchError && error.response?.status === UNAUTHORIZE_ERROR_CODE;
   const isForbiddenError =
     isFetchError && error.response?.status === FORBIDDEN_ERROR_CODE;
+  const isNotFoundError =
+    isFetchError && error.response?.status === NOT_FOUND_ERROR_CODE;
   const isValidationError =
     isFetchError && error.response?.status === VALIDATION_ERROR_CODE;
 
@@ -24,6 +27,10 @@ export const useApiError = (error: any) => {
 
   return {
     isValidationError,
+    isNotFoundError,
+    isUnauthorizeError,
+    isUnknownError,
+    isForbiddenError,
     code,
     bag,
   };

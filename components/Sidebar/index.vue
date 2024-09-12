@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const user = useSanctumUser();
+const { user } = useAuth();
 const items = ref([
   {
     id: 1,

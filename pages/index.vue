@@ -2,19 +2,15 @@
 definePageMeta({
   middleware: "sanctum:auth",
 });
-const loading = ref(true);
+const { getPosts } = usePost();
 const posts = ref([]);
-
+const loading = ref(true);
 const isOpenModal = ref(false);
-const getPosts = async () => {
-  loading.value = true;
-  posts.value = await $fetch("http://localhost:8080/posts");
-  loading.value = false;
-  // console.log(posts.value);
-};
 
 onMounted(async () => {
-  await getPosts();
+  loading.value = true;
+  posts.value = await getPosts();
+  loading.value = false;
 });
 </script>
 
@@ -56,15 +52,7 @@ onMounted(async () => {
     />
 
     <div class="w-full" v-if="posts && posts.length > 0">
-      <!-- Post card -->
-      <PostCard v-for="post in posts" :key="post">
-        <div class="content">
-          <NuxtLink href="/@username/posts/post-test-slug">
-            <p>{{ post.body }}</p>
-          </NuxtLink>
-          <!-- <div>post's images</div> -->
-        </div>
-      </PostCard>
+      <Post v-for="post in posts" :key="post" :post="post" />
     </div>
     <div v-if="!loading && posts.length === 0">No posts yet</div>
     <LoaderSkeleton v-for="i in 3" :loading="loading" />

@@ -3,11 +3,8 @@ definePageMeta({
   middleware: "sanctum:auth",
 });
 
-const user = ref<any>({
-  name: "ArKar Minn",
-  username: "arkar_minn",
-});
-
+const { fetchUserPosts, user } = useAuth();
+const posts = ref<any>([]);
 let tab = ref("posts");
 const toggleTab = (_tab: string) => {
   if (_tab == "posts") {
@@ -16,6 +13,9 @@ const toggleTab = (_tab: string) => {
     tab.value = "reposts";
   }
 };
+onMounted(async () => {
+  posts.value = await fetchUserPosts();
+});
 </script>
 
 <template>
@@ -107,7 +107,13 @@ const toggleTab = (_tab: string) => {
       </div>
 
       <div class="mt-6">
-        <ProfilePostsList :posts="user.posts" v-if="tab == 'posts'" />
+        <ProfilePostsList :posts="posts" v-if="tab == 'posts'" />
+        <!-- <Post
+          :post="post"
+          v-for="post in posts"
+          :key="post"
+          v-if="tab == 'posts'"
+        /> -->
         <ProfileRepostsList :posts="user.reposts" v-if="tab == 'reposts'" />
       </div>
     </div>
