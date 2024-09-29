@@ -3,10 +3,14 @@ definePageMeta({
   middleware: "sanctum:auth",
 });
 
-const { fetchUserPosts, user } = useAuth();
-const posts = ref([]);
+const { user: authUser } = useAuth();
+const { getUserPosts, getUserAndPosts, getUser } = useUser();
+const route = useRoute<any>();
+
+const user = await getUser(route.params.username);
+const posts = ref<any>([]);
 const loading = ref(true);
-// const posts = await fetchUserPosts();
+
 let tab = ref("posts");
 const toggleTab = (_tab: string) => {
   if (_tab == "posts") {
@@ -15,15 +19,21 @@ const toggleTab = (_tab: string) => {
     tab.value = "reposts";
   }
 };
+
 onMounted(async () => {
   loading.value = true;
-  posts.value = await fetchUserPosts();
+  if (authUser.value.username === user.value.username) {
+    posts.value = await getUserPosts(route.params.username);
+  } else {
+    const response = await getUserAndPosts(route.params.username);
+    posts.value = response.posts;
+  }
   loading.value = false;
 });
 </script>
 
 <template>
-  <div class="sm:p-6" v-if="user">
+  <div id="user-profile-page" class="sm:p-6" v-if="user">
     <div class="p-3 sm:p-0">
       <!-- User name and avatar -->
       <div class="flex justify-between items-center">
@@ -83,9 +93,14 @@ onMounted(async () => {
 
       <!-- Edit profile button -->
       <div class="my-4">
-        <div>
+        <div v-if="user?.username === authUser?.username">
           <button class="w-full border dark:border-darkGray py-1.5 rounded-lg">
             Edit profile
+          </button>
+        </div>
+        <div v-else>
+          <button class="w-full border dark:border-darkGray py-1.5 rounded-lg">
+            Follow
           </button>
         </div>
       </div>

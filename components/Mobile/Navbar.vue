@@ -40,7 +40,7 @@ const route = useRoute();
 
 <style lang="scss" scoped>
 .mobile-navbar {
-  @apply w-full sm:hidden fixed top-0 z-50 flex justify-end items-center p-3 
+  @apply w-full sm:hidden fixed top-0 z-[99] flex justify-end items-center p-3 
         bg-white/90 backdrop-filter backdrop-blur-sm dark:bg-dark/80;
 }
 .nav-link {

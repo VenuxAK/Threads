@@ -83,22 +83,8 @@ export const useAuth = () => {
   const verifyEmail = async () => {};
   const notifyEmailVerification = async () => {};
 
-  const fetchUserPosts = async () => {
-    try {
-      const response = await client("/api/v1/user/posts");
-      return response.posts;
-    } catch (err) {
-      console.log(err);
-      const error = useApiError(err);
-      if (error.isValidationError || error.isNotFoundError) {
-        throw error.bag;
-      }
-    }
-  };
-
   return {
     user,
-    fetchUserPosts,
     signUp,
     signIn,
     signOut,

@@ -59,7 +59,7 @@ const items = ref([
 .mobile-menu {
   // @apply fixed sm:hidden bottom-0 left-0 z-50 w-full h-[70px] bg-white/20 backdrop-filter backdrop-blur-md border-t
   //       dark:bg-dark/80  dark:backdrop-blur-sm dark:border-dark;
-  @apply fixed sm:hidden bottom-0 left-0 z-50 w-full h-[70px]
+  @apply fixed sm:hidden bottom-0 left-0 z-[99] w-full h-[70px]
      bg-white/90 backdrop-filter backdrop-blur-sm dark:bg-dark/80;
 
   .mobile-menu-items {
