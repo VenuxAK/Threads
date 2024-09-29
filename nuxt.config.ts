@@ -36,7 +36,7 @@ export default defineNuxtConfig({
     endpoints: {
       login: "/auth/login",
       logout: "/auth/logout",
-      user: "/api/user",
+      user: "/api/v1/user",
     },
     redirect: {
       onLogin: false,

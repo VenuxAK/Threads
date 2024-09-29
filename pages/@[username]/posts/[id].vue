@@ -5,11 +5,15 @@ definePageMeta({
 const route = useRoute();
 const { getPost } = usePost();
 const post = ref(null);
-post.value = await getPost(route.params.slug);
+
+onMounted(async () => {
+  post.value = await getPost(route.params.id);
+});
 </script>
 <template>
   <div>
-    <Post :post="post" />
+    <Post :post="post" v-if="post" :show-replied="true" />
+    <LoaderSkeleton :loading="!post" />
   </div>
 </template>
 

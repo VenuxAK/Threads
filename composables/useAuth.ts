@@ -4,7 +4,7 @@ export const useAuth = () => {
 
   const user = computed(() => {
     const _user: any = useSanctumUser();
-    return _user.value.user;
+    return _user.value;
   });
 
   const signUp = async (name: string, email: string, password: string) => {
@@ -85,9 +85,10 @@ export const useAuth = () => {
 
   const fetchUserPosts = async () => {
     try {
-      const response = await client("/api/user/posts");
+      const response = await client("/api/v1/user/posts");
       return response.posts;
     } catch (err) {
+      console.log(err);
       const error = useApiError(err);
       if (error.isValidationError || error.isNotFoundError) {
         throw error.bag;

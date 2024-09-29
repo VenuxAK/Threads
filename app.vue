@@ -18,7 +18,7 @@ const indicator = ref({
 </template>
 
 <style>
-.page-enter-active,
+/* .page-enter-active,
 .page-leave-active {
   transition: all 300ms;
 }
@@ -26,5 +26,5 @@ const indicator = ref({
 .page-leave-to {
   opacity: 0;
   filter: blur(1rem);
-}
+} */
 </style>

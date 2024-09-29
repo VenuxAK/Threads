@@ -4,7 +4,9 @@ definePageMeta({
 });
 
 const { fetchUserPosts, user } = useAuth();
-const posts = ref<any>([]);
+const posts = ref([]);
+const loading = ref(true);
+// const posts = await fetchUserPosts();
 let tab = ref("posts");
 const toggleTab = (_tab: string) => {
   if (_tab == "posts") {
@@ -14,7 +16,9 @@ const toggleTab = (_tab: string) => {
   }
 };
 onMounted(async () => {
+  loading.value = true;
   posts.value = await fetchUserPosts();
+  loading.value = false;
 });
 </script>
 
@@ -107,13 +111,12 @@ onMounted(async () => {
       </div>
 
       <div class="mt-6">
-        <ProfilePostsList :posts="posts" v-if="tab == 'posts'" />
-        <!-- <Post
-          :post="post"
-          v-for="post in posts"
-          :key="post"
+        <ProfilePostsList
+          :posts="posts"
           v-if="tab == 'posts'"
-        /> -->
+          :loading="!loading"
+        />
+
         <ProfileRepostsList :posts="user.reposts" v-if="tab == 'reposts'" />
       </div>
     </div>
