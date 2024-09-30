@@ -27,7 +27,7 @@ export const usePost = () => {
 
   const createPost = async (content: string) => {
     try {
-      await client("/api/v1/posts", {
+      await client("/api/v1/user/posts", {
         method: "POST",
         body: { content },
       });
