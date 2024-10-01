@@ -65,8 +65,6 @@ const extractHashtags = (caption: string) => {
 
 <style lang="scss" scoped>
 .post-card {
-  @apply mb-4;
-
   .card-content {
     @apply text-sm text-darkGray dark:text-white/90;
   }

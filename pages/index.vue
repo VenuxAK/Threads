@@ -16,8 +16,8 @@ onMounted(async () => {
 
 ]
 <template>
-  <div class="space-y-6">
-    <Card class="hidden sm:block border-none">
+  <div class="space-y-3 md:divide-y divide-gray-300 dark:divide-darkGray">
+    <Card class="hidden sm:block">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <div>
@@ -51,11 +51,16 @@ onMounted(async () => {
       @openModal="() => (isOpenModal = true)"
     />
 
-    <div class="w-full" v-if="posts && posts.length > 0">
+    <div
+      class="w-full divide-y divide-gray-300 dark:divide-darkGray"
+      v-if="posts && posts.length > 0"
+    >
       <Post v-for="post in posts" :key="post" :post="post" />
     </div>
     <div v-if="!loading && posts.length === 0">No posts yet</div>
-    <LoaderSkeleton v-for="i in 3" :loading="loading" />
+    <div class="divide-y divide-gray-300 dark:divide-darkGray">
+      <LoaderSkeleton v-for="i in 3" :loading="loading" />
+    </div>
   </div>
 </template>
 

@@ -1,6 +1,12 @@
 <template>
-  <LoaderSkeleton v-for="i in 2" :loading="!loading" />
-  <Post v-for="post in posts" :key="post" :post="post" />
+  <div>
+    <div class="divide-y divide-darkGray">
+      <LoaderSkeleton v-for="i in 2" :loading="!loading" />
+    </div>
+    <div class="divide-y divide-darkGray">
+      <Post v-for="post in posts" :key="post" :post="post" />
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>

@@ -15,6 +15,6 @@
 
 <style lang="scss" scoped>
 .post-replied {
-  @apply border-t dark:border-lightGray/20 mt-3 py-2;
+  @apply border-t dark:border-darkGray mt-3 py-2;
 }
 </style>
