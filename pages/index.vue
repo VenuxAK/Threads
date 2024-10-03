@@ -16,7 +16,7 @@ onMounted(async () => {
 
 ]
 <template>
-  <div class="space-y-3 md:divide-y divide-gray-300 dark:divide-darkGray">
+  <div class="space-y-3 sm:divide-y divide-gray-300 dark:divide-darkGray">
     <Card class="hidden sm:block">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">

@@ -6,7 +6,9 @@ export const usePost = () => {
       const response = await client("/api/v1/posts");
       return response.posts;
     } catch (err) {
-      console.log(err);
+      const error = useApiError(err);
+      // console.log(`Error: ${error.bag}\nCode: ${error.code}` );
+      // console.log(err);
     }
   };
 
@@ -22,6 +24,23 @@ export const usePost = () => {
           statusMessage: "Post Not Found",
         });
       }
+    }
+  };
+
+  const search = async (search: string, post: boolean = false) => {
+    try {
+      const response = await client(
+        `/api/v1/search${post ? "?posts=include" : ""}`,
+        {
+          method: "POST",
+          body: { keyword: search },
+        }
+      );
+      // console.log(response);
+
+      return response;
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -46,6 +65,7 @@ export const usePost = () => {
   return {
     getPosts,
     getPost,
+    search,
     createPost,
     updatePost,
     deletePost,

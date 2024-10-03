@@ -9,14 +9,12 @@ export const useUser = () => {
         return _user;
       }
 
-      const response = await $fetch<any>(
-        `http://localhost:8000/api/v1/users/${username}`
-      );
-
-      // return response;
+      const response = await client(`/api/v1/users/${username}`);
+      
       return toRef(response?.user);
     } catch (err) {
-      console.log(err);
+      const error = useApiError(err);
+      console.log(error.code);
     }
   };
 
