@@ -14,7 +14,6 @@ onMounted(async () => {
 });
 </script>
 
-]
 <template>
   <div class="space-y-3 sm:divide-y divide-gray-300 dark:divide-darkGray">
     <Card class="hidden sm:block">

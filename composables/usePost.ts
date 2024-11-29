@@ -1,6 +1,6 @@
 export const usePost = () => {
   const client = useSanctumClient();
-
+  const route = useRoute();
   const getPosts = async () => {
     try {
       const response = await client("/api/v1/posts");
@@ -14,7 +14,11 @@ export const usePost = () => {
 
   const getPost = async (id: string) => {
     try {
-      const response = await client(`/api/v1/posts/${id}`);
+      const response = await client(
+        `/api/v1/users/${route.params.username}?post=${id}`
+      );
+      console.log(response);
+
       return response.post;
     } catch (err) {
       const error = useApiError(err);
@@ -58,6 +62,48 @@ export const usePost = () => {
     }
   };
 
+  const createComment = async (content: string) => {
+    try {
+      await client(
+        `/api/v1/users/${route.params.username}/posts/${route.params.id}/comments`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: {
+            content,
+          },
+        }
+      );
+    } catch (err) {
+      const error = useApiError(err);
+      if (error.bag) {
+        console.log(error.bag);
+        throw error.bag;
+      }
+    }
+  };
+
+  const createLike = async (post_id: string) => {
+    try {
+      await client(
+        `/api/v1/users/${route.params.username}/posts/${post_id}/likes`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (err) {
+      const error = useApiError(err);
+      console.log(error.bag);
+    }
+  };
+
   const updatePost = async () => {};
 
   const deletePost = async () => {};
@@ -69,5 +115,7 @@ export const usePost = () => {
     createPost,
     updatePost,
     deletePost,
+    createComment,
+    createLike,
   };
 };

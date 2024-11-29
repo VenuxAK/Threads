@@ -58,8 +58,8 @@ const extractHashtags = (caption: string) => {
         <div v-html="formattedCaption"></div>
       </NuxtLink>
     </div>
-    <PostFooter />
-    <PostReplied v-if="showReplied" />
+    <PostFooter :post="post" />
+    <PostReplied v-if="showReplied" :comments="post.comments" />
   </Card>
 </template>
 
