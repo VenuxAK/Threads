@@ -15,7 +15,7 @@
     "@nuxtjs/color-mode": "^3.4.4",
     "@nuxtjs/tailwindcss": "^6.12.1",
     "@vueuse/core": "^11.0.1",
-    "nuxt": "^3.12.4",
+    "nuxt": "^4.2.2",
     "nuxt-auth-sanctum": "^0.4.10",
     "nuxt-headlessui": "^1.2.0",
     "vue": "latest"
