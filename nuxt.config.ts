@@ -29,20 +29,20 @@ export default defineNuxtConfig({
     preference: "system",
   },
   devServer: {
-    host: ["localhost", "192.168.100.227"],
+    host: "localhost",
   },
   sanctum: {
     baseUrl: "http://localhost:8000",
     endpoints: {
       login: "/auth/login",
       logout: "/auth/logout",
-      user: "/api/v1/user",
+      user: "/api/v1/me/profile",
     },
     redirect: {
       onLogin: false,
       onLogout: "/signin",
       onGuestOnly: "/",
-      onAuthOnly: "/signin"
+      onAuthOnly: "/signin",
     },
   },
 });

@@ -8,8 +8,12 @@ const { getUserPosts, getUserAndPosts, getUser } = useUser();
 const route = useRoute<any>();
 
 const user = await getUser(route.params.username);
-const posts = ref<any>([]);
+const posts = ref<any[]>([]);
 const loading = ref(true);
+const loadingMore = ref(false);
+const currentPage = ref(1);
+const hasMore = ref(true);
+const loadTrigger = ref<HTMLElement | null>(null);
 
 let tab = ref("posts");
 const toggleTab = (_tab: string) => {
@@ -20,15 +24,65 @@ const toggleTab = (_tab: string) => {
   }
 };
 
-onMounted(async () => {
-  loading.value = true;
-  if (authUser.value.username === user.value.username) {
-    posts.value = await getUserPosts(route.params.username);
+const loadPosts = async (page: number = 1, append: boolean = false) => {
+  if (append && loadingMore.value) return;
+  
+  if (append) {
+    loadingMore.value = true;
   } else {
-    const response = await getUserAndPosts(route.params.username);
-    posts.value = response.posts;
+    loading.value = true;
   }
+  
+  let result;
+  if (authUser.value.username === user.value.username) {
+    result = await getUserPosts(route.params.username, page);
+  } else {
+    result = await getUserAndPosts(route.params.username, page);
+  }
+  
+  if (result && result.posts) {
+    if (append) {
+      posts.value = [...posts.value, ...result.posts];
+    } else {
+      posts.value = result.posts;
+    }
+    
+    if (result.pagination) {
+      hasMore.value = result.pagination.current_page < result.pagination.last_page;
+      currentPage.value = result.pagination.current_page;
+    } else {
+      hasMore.value = false;
+    }
+  }
+  
   loading.value = false;
+  loadingMore.value = false;
+};
+
+const loadMore = () => {
+  if (hasMore.value && !loadingMore.value) {
+    loadPosts(currentPage.value + 1, true);
+  }
+};
+
+onMounted(async () => {
+  await loadPosts();
+  
+  if (process.client) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        loadMore();
+      }
+    }, { threshold: 0.1 });
+    
+    nextTick(() => {
+      if (loadTrigger.value) {
+        observer.observe(loadTrigger.value);
+      }
+    });
+    
+    onUnmounted(() => observer.disconnect());
+  }
 });
 </script>
 
@@ -134,6 +188,11 @@ onMounted(async () => {
 
         <ProfileRepostsList :posts="user.reposts" v-if="tab == 'reposts'" />
       </div>
+    </div>
+    
+    <div ref="loadTrigger" class="py-4 text-center">
+      <div v-if="loadingMore" class="text-sm text-gray-500">Loading more...</div>
+      <div v-else-if="!hasMore && posts.length > 0" class="text-sm text-gray-500">No more posts</div>
     </div>
   </div>
 </template>

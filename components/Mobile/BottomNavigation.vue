@@ -1,42 +1,49 @@
 <script lang="ts" setup>
 const user = useSanctumUser();
-const items = ref([
-  {
-    id: 1,
-    name: "Home",
-    link: "/",
-    icon: "teenyicons:home-solid",
-    class: "mobile-menu-item",
-  },
-  {
-    id: 2,
-    name: "Search",
-    link: "/search",
-    icon: "mingcute:search-line",
-    class: "mobile-menu-item",
-  },
-  {
-    id: 3,
-    name: "Thread",
-    link: "/create",
-    icon: "mingcute:edit-line",
-    class: "mobile-menu-item",
-  },
-  {
-    id: 4,
-    name: "Notifications",
-    link: "/notifications",
-    icon: "gravity-ui:heart",
-    class: "mobile-menu-item",
-  },
-  {
-    id: 5,
-    name: "Profile",
-    link: `/@${user.value.username}`,
-    icon: "gravity-ui:person",
-    class: "mobile-menu-item",
-  },
-]);
+
+const items = computed(() => {
+  const username = user.value?.data.username ?? "";
+  const base = [
+    {
+      id: 1,
+      name: "Home",
+      link: "/",
+      icon: "teenyicons:home-solid",
+      class: "mobile-menu-item",
+    },
+    {
+      id: 2,
+      name: "Search",
+      link: "/search",
+      icon: "mingcute:search-line",
+      class: "mobile-menu-item",
+    },
+    {
+      id: 3,
+      name: "Thread",
+      link: "/create",
+      icon: "mingcute:edit-line",
+      class: "mobile-menu-item",
+    },
+    {
+      id: 4,
+      name: "Notifications",
+      link: "/notifications",
+      icon: "gravity-ui:heart",
+      class: "mobile-menu-item",
+    },
+  ];
+  if (username) {
+    base.push({
+      id: 5,
+      name: "Profile",
+      link: `/@${username}`,
+      icon: "gravity-ui:person",
+      class: "mobile-menu-item",
+    });
+  }
+  return base;
+});
 </script>
 
 <template>

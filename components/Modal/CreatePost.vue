@@ -5,7 +5,7 @@ const props = defineProps({
     default: true,
   },
 });
-const emit = defineEmits(["closeModal", "openModal"]);
+const emit = defineEmits(["closeModal", "openModal", "created"]);
 const user = useSanctumUser();
 const content = ref("");
 
@@ -21,7 +21,9 @@ const onCreatePost = async () => {
   try {
     await createPost(content.value);
     error.value = null;
+    content.value = "";
     emit("closeModal");
+    emit("created");
   } catch (err) {
     error.value = err;
   }
@@ -64,13 +66,13 @@ const onCreatePost = async () => {
                 <div class="flex flex-col space-y-6">
                   <div class="flex space-x-5 items-start">
                     <div class="">
-                      <NuxtLink :href="`/@${user.username}`">
+                       <NuxtLink :href="user ? `/@${user.username}` : ''">
                         <Avatar class="w-10" />
                       </NuxtLink>
                     </div>
                     <div class="flex-1">
                       <NuxtLink
-                        :href="`/@${user.username}`"
+                         :href="user ? `/@${user.username}` : ''"
                         class="font-bold text-sm"
                       >
                         <p>{{ user.username }}</p>

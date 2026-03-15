@@ -1,21 +1,42 @@
 export const usePost = () => {
   const client = useSanctumClient();
 
-  const getPosts = async () => {
+  const getPosts = async (page: number = 1) => {
     try {
-      const response = await client("/api/v1/posts");
-      return response.posts;
+      const response: any = await client(`/api/v1/posts?page=${page}`);
+      
+      let posts: any[] = [];
+      let pagination: any = null;
+
+      // The API returns { success: true, data: { posts: { data: [], ... }, pagination: { ... } } }
+      // OR { success: true, data: { posts: [], pagination: { ... } } }
+      
+      const data = response?.data;
+      if (data) {
+        if (data.posts) {
+          // If posts is a paginator object
+          if (data.posts.data && Array.isArray(data.posts.data)) {
+            posts = data.posts.data;
+          } 
+          // If posts is directly an array
+          else if (Array.isArray(data.posts)) {
+            posts = data.posts;
+          }
+        }
+        pagination = data.pagination;
+      }
+
+      return { posts, pagination };
     } catch (err) {
-      const error = useApiError(err);
-      // console.log(`Error: ${error.bag}\nCode: ${error.code}` );
-      // console.log(err);
+      console.error('getPosts error:', err);
+      return { posts: [], pagination: null };
     }
   };
 
   const getPost = async (id: string) => {
     try {
-      const response = await client(`/api/v1/posts/${id}`);
-      return response.post;
+      const response: any = await client(`/api/v1/posts/${id}`);
+      return response.data?.post ?? response.post;
     } catch (err) {
       const error = useApiError(err);
       if (error.isNotFoundError) {
@@ -34,11 +55,10 @@ export const usePost = () => {
         {
           method: "POST",
           body: { keyword: search },
-        }
+        },
       );
-      // console.log(response);
 
-      return response;
+      return response.data;
     } catch (error) {
       console.log(error);
     }
@@ -46,7 +66,7 @@ export const usePost = () => {
 
   const createPost = async (content: string) => {
     try {
-      await client("/api/v1/user/posts", {
+      await client("/api/v1/me/posts", {
         method: "POST",
         body: { content },
       });

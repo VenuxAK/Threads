@@ -15,13 +15,13 @@ const followUser = () => {
   <Card>
     <div class="flex items-center space-x-2">
       <div>
-        <NuxtLink :href="`/@${user.username}`">
+         <NuxtLink :href="user && user.username ? `/@${user.username}` : ''">
           <Avatar />
         </NuxtLink>
       </div>
       <div class="flex-1 flex justify-between">
         <div>
-          <NuxtLink :href="`/@${user.username}`">
+          <NuxtLink :href="user && user.username ? `/@${user.username}` : ''">
             <p class="text-sm font-bold">{{ user.username }}</p>
             <p class="text-sm font-light">{{ user.name }}</p>
           </NuxtLink>

@@ -1,5 +1,1 @@
-#XSS Vulnerabality in display post 
-
-# Todo 
-    - Fix XSS affected  post display
 

@@ -1,42 +1,48 @@
 <script lang="ts" setup>
 const { user } = useAuth();
-const items = ref([
-  {
-    id: 1,
-    name: "Home",
-    link: "/",
-    icon: "teenyicons:home-solid",
-    class: "menu-item",
-  },
-  {
-    id: 2,
-    name: "Search",
-    link: "/search",
-    icon: "mingcute:search-line",
-    class: "menu-item",
-  },
-  {
-    id: 3,
-    name: "Thread",
-    link: "/create",
-    icon: "mingcute:edit-line",
-    class: "menu-item sm:hidden",
-  },
-  {
-    id: 4,
-    name: "Notifications",
-    link: "/notifications",
-    icon: "gravity-ui:heart",
-    class: "menu-item",
-  },
-  {
-    id: 5,
-    name: "Profile",
-    link: `/@${user.value.username}`,
-    icon: "gravity-ui:person",
-    class: "menu-item",
-  },
-]);
+const items = computed(() => {
+  const username = user.value?.username ?? '';
+  const base = [
+    {
+      id: 1,
+      name: "Home",
+      link: "/",
+      icon: "teenyicons:home-solid",
+      class: "menu-item",
+    },
+    {
+      id: 2,
+      name: "Search",
+      link: "/search",
+      icon: "mingcute:search-line",
+      class: "menu-item",
+    },
+    {
+      id: 3,
+      name: "Thread",
+      link: "/create",
+      icon: "mingcute:edit-line",
+      class: "menu-item sm:hidden",
+    },
+    {
+      id: 4,
+      name: "Notifications",
+      link: "/notifications",
+      icon: "gravity-ui:heart",
+      class: "menu-item",
+    },
+  ];
+  if (username) {
+    base.push({
+      id: 5,
+      name: "Profile",
+      link: `/@${username}`,
+      icon: "gravity-ui:person",
+      class: "menu-item",
+    });
+  }
+  return base;
+});
 </script>
 
 <template>
