@@ -1,42 +1,46 @@
+import type { Post, Pagination } from '~/types';
+
+const parsePostsResponse = (response: any): { posts: Post[]; pagination: Pagination | null } => {
+  let posts: Post[] = [];
+  let pagination: Pagination | null = null;
+
+  const data = response?.data;
+  if (data) {
+    if (data.posts) {
+      if (data.posts.data && Array.isArray(data.posts.data)) {
+        posts = data.posts.data;
+      } else if (Array.isArray(data.posts)) {
+        posts = data.posts;
+      }
+      if (data.posts.current_page) {
+        pagination = data.posts;
+      }
+    }
+    if (data.pagination) {
+      pagination = data.pagination;
+    }
+  }
+
+  return { posts, pagination };
+};
+
 export const usePost = () => {
   const client = useSanctumClient();
 
-  const getPosts = async (page: number = 1) => {
+  const getPosts = async (page: number = 1): Promise<{ posts: Post[]; pagination: Pagination | null }> => {
     try {
       const response: any = await client(`/api/v1/posts?page=${page}`);
-      
-      let posts: any[] = [];
-      let pagination: any = null;
-
-      // The API returns { success: true, data: { posts: { data: [], ... }, pagination: { ... } } }
-      // OR { success: true, data: { posts: [], pagination: { ... } } }
-      
-      const data = response?.data;
-      if (data) {
-        if (data.posts) {
-          // If posts is a paginator object
-          if (data.posts.data && Array.isArray(data.posts.data)) {
-            posts = data.posts.data;
-          } 
-          // If posts is directly an array
-          else if (Array.isArray(data.posts)) {
-            posts = data.posts;
-          }
-        }
-        pagination = data.pagination;
-      }
-
-      return { posts, pagination };
+      return parsePostsResponse(response);
     } catch (err) {
       console.error('getPosts error:', err);
       return { posts: [], pagination: null };
     }
   };
 
-  const getPost = async (id: string) => {
+  const getPost = async (id: string): Promise<Post | null> => {
     try {
       const response: any = await client(`/api/v1/posts/${id}`);
-      return response.data?.post ?? response.post;
+      return response.data?.post ?? response.post ?? null;
     } catch (err) {
       const error = useApiError(err);
       if (error.isNotFoundError) {
@@ -45,6 +49,7 @@ export const usePost = () => {
           statusMessage: "Post Not Found",
         });
       }
+      return null;
     }
   };
 

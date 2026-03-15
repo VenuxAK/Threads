@@ -1,76 +1,52 @@
 <script lang="ts" setup>
+import type { User, Post } from '~/types';
+
 definePageMeta({
   middleware: "sanctum:auth",
 });
 
 const { user: authUser } = useAuth();
 const { getUserPosts, getUserAndPosts, getUser } = useUser();
-const route = useRoute<any>();
+const route = useRoute();
 
-const user = await getUser(route.params.username);
-const posts = ref<any[]>([]);
-const loading = ref(true);
-const loadingMore = ref(false);
-const currentPage = ref(1);
-const hasMore = ref(true);
+const getUsernameParam = (): string => {
+  const param = route.params.username;
+  if (Array.isArray(param)) return param[0] || '';
+  return param || '';
+};
+
+const usernameStr = getUsernameParam();
+const userData = await getUser(usernameStr);
+
+if (!userData) {
+  throw createError({ statusCode: 404, statusMessage: 'User not found' });
+}
+
+const user = ref<User>(userData);
+
+const { posts, loading, loadingMore, hasMore, loadPosts, loadMore } = usePostList({
+  fetchFn: async (page: number) => {
+    if (authUser.value?.username === user.value.username) {
+      return await getUserPosts(usernameStr, page);
+    } else {
+      return await getUserAndPosts(usernameStr, page);
+    }
+  }
+});
+
 const loadTrigger = ref<HTMLElement | null>(null);
 
-let tab = ref("posts");
-const toggleTab = (_tab: string) => {
-  if (_tab == "posts") {
-    tab.value = "posts";
-  } else if (_tab == "reposts") {
-    tab.value = "reposts";
-  }
-};
-
-const loadPosts = async (page: number = 1, append: boolean = false) => {
-  if (append && loadingMore.value) return;
-  
-  if (append) {
-    loadingMore.value = true;
-  } else {
-    loading.value = true;
-  }
-  
-  let result;
-  if (authUser.value.username === user.value.username) {
-    result = await getUserPosts(route.params.username, page);
-  } else {
-    result = await getUserAndPosts(route.params.username, page);
-  }
-  
-  if (result && result.posts) {
-    if (append) {
-      posts.value = [...posts.value, ...result.posts];
-    } else {
-      posts.value = result.posts;
-    }
-    
-    if (result.pagination) {
-      hasMore.value = result.pagination.current_page < result.pagination.last_page;
-      currentPage.value = result.pagination.current_page;
-    } else {
-      hasMore.value = false;
-    }
-  }
-  
-  loading.value = false;
-  loadingMore.value = false;
-};
-
-const loadMore = () => {
-  if (hasMore.value && !loadingMore.value) {
-    loadPosts(currentPage.value + 1, true);
-  }
+const tab = ref<'posts' | 'reposts'>('posts');
+const toggleTab = (_tab: 'posts' | 'reposts') => {
+  tab.value = _tab;
 };
 
 onMounted(async () => {
   await loadPosts();
   
-  if (process.client) {
+  if (import.meta.client) {
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
+      if (entries[0]?.isIntersecting) {
         loadMore();
       }
     }, { threshold: 0.1 });
@@ -87,9 +63,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div id="user-profile-page" class="sm:p-6" v-if="user">
+  <div id="user-profile-page" class="sm:p-6">
     <div class="p-3 sm:p-0">
-      <!-- User name and avatar -->
       <div class="flex justify-between items-center">
         <div>
           <h3 class="font-bold text-lg sm:text-xl">{{ user.name }}</h3>
@@ -97,12 +72,11 @@ onMounted(async () => {
         </div>
         <div>
           <button>
-            <Avatar class="w-[75px]" />
+            <Avatar :src="user.avatar" class="w-[75px]" />
           </button>
         </div>
       </div>
 
-      <!-- Bio, follower, following and social link buttons -->
       <div class="mt-6 space-y-3">
         <div class="flex justify-between items-center">
           <div class="space-y-2">
@@ -124,28 +98,9 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-
-          <!-- Add social link feature later -->
-          <!-- <div>
-            <div class="space-x-1 flex justify-end items-center">
-              <button class="social-btn">
-                <Icon name="skill-icons:instagram" size="20" />
-              </button>
-              <button class="social-btn text-blue-600">
-                <Icon name="mdi:facebook" size="20" />
-              </button>
-              <button class="social-btn">
-                <Icon name="prime:twitter" size="20" />
-              </button>
-              <button class="social-btn bg-black/5 dark:bg-white/10">
-                <Icon name="fa6-solid:plus" size="20" class="" />
-              </button>
-            </div>
-          </div> -->
         </div>
       </div>
 
-      <!-- Edit profile button -->
       <div class="my-4">
         <div v-if="user?.username === authUser?.username">
           <button class="w-full border dark:border-darkGray py-1.5 rounded-lg">
@@ -160,7 +115,6 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- Posts, Reposts toggler tab -->
     <div>
       <div class="border-b dark:border-white/10">
         <div class="btn-tabs">

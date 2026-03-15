@@ -81,14 +81,14 @@
 <script lang="ts" setup>
 const router = useRouter();
 const { width, height } = useWindowSize();
-let isApperenceOpen = ref(false);
+const isApperenceOpen = ref(false);
 const { signOut } = useAuth();
 
 const onSignOut = async () => {
   await signOut();
 };
 
-const handleClose = (close, link = null) => {
+const handleClose = (close: () => void, link: string | null = null) => {
   close();
   if (link) {
     router.push(link);

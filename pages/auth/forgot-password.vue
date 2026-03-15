@@ -6,7 +6,7 @@ definePageMeta({
 });
 
 const email = ref<string>("");
-const error = ref<Object | null>(null);
+const error = ref<Record<string, string[]> | null>(null);
 const success = ref<string>("");
 const loading = ref<boolean>(false);
 

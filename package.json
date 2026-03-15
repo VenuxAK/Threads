@@ -14,11 +14,13 @@
     "@nuxt/icon": "^1.4.5",
     "@nuxtjs/color-mode": "^3.4.4",
     "@nuxtjs/tailwindcss": "^6.12.1",
+    "@pinia/nuxt": "^0.11.3",
     "@vueuse/core": "^11.0.1",
     "dompurify": "^3.3.3",
     "nuxt": "^4.2.2",
     "nuxt-auth-sanctum": "^0.4.10",
     "nuxt-headlessui": "^1.2.0",
+    "pinia": "^3.0.4",
     "vue": "latest"
   },
   "devDependencies": {

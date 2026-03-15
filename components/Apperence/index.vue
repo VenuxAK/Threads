@@ -64,7 +64,7 @@ onClickOutside(target, (event) => {
   emit("closeApperence");
 });
 
-const handleApperence = (theme) => {
+const handleApperence = (theme: string) => {
   colorMode.preference = theme;
 };
 </script>

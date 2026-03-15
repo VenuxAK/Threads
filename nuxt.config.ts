@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "@vueuse/nuxt",
     "nuxt-auth-sanctum",
+    "@pinia/nuxt",
   ],
   app: {
     pageTransition: { name: "page", mode: "out-in" },

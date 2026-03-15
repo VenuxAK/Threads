@@ -36,7 +36,9 @@ export const useSanitize = () => {
     const tags: string[] = [];
     let match;
     while ((match = hashtagRegex.exec(caption)) !== null) {
-      tags.push(match[1]);
+      if (match[1]) {
+        tags.push(match[1]);
+      }
     }
     return tags;
   };

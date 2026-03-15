@@ -1,10 +1,5 @@
 <script setup lang="ts">
-const { user } = defineProps({
-  user: {
-    required: true,
-    type: Object,
-  },
-});
+defineProps<{ user: Record<string, any> }>();
 
 const followUser = () => {
   console.log("Following");
@@ -15,13 +10,13 @@ const followUser = () => {
   <Card>
     <div class="flex items-center space-x-2">
       <div>
-         <NuxtLink :href="user && user.username ? `/@${user.username}` : ''">
-          <Avatar />
+         <NuxtLink :href="user?.username ? `/@${user.username}` : ''">
+          <Avatar :src="user.avatar" />
         </NuxtLink>
       </div>
       <div class="flex-1 flex justify-between">
         <div>
-          <NuxtLink :href="user && user.username ? `/@${user.username}` : ''">
+          <NuxtLink :href="user?.username ? `/@${user.username}` : ''">
             <p class="text-sm font-bold">{{ user.username }}</p>
             <p class="text-sm font-light">{{ user.name }}</p>
           </NuxtLink>
@@ -32,7 +27,7 @@ const followUser = () => {
       </div>
     </div>
     <p class="ml-9 text-sm dark:text-lightGray/60">
-      <NuxtLink href="#" class="hover:underline"> Followers 123 </NuxtLink>
+      <NuxtLink href="#" class="hover:underline"> Followers {{ user.followes ?? 0 }} </NuxtLink>
     </p>
   </Card>
 </template>

@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-const user = useSanctumUser();
+const user = useSanctumUser<{ username?: string }>();
 
 const items = computed(() => {
-  const username = user.value?.data.username ?? "";
+  const username = user.value?.username ?? "";
   const base = [
     {
       id: 1,

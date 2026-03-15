@@ -8,7 +8,7 @@
       :placeholder="placeholder"
       @input="updateValue"
     />
-    <Icon :name="icon" size="25" class="input-icon" />
+    <Icon v-if="icon" :name="icon" size="25" class="input-icon" />
   </div>
   <div class="relative flex items-center" v-else>
     <input

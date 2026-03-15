@@ -1,20 +1,16 @@
 <script setup lang="ts">
-const props = defineProps({
-  posts: {
-    required: true,
-    type: Array,
-  },
-  loading: {
-    required: true,
-    type: Boolean,
-  },
-});
+import type { Post } from '~/types';
+
+defineProps<{
+  posts: Post[];
+  loading: boolean;
+}>();
 </script>
 
 <template>
   <div v-if="posts.length > 0">
     <div class="divide-y dark:divide-darkGray">
-      <Post v-for="post in posts" :key="post" :post="post" />
+      <Post v-for="post in posts" :key="post.id" :post="post" />
     </div>
   </div>
   <div v-else-if="loading">

@@ -1,58 +1,20 @@
 <script setup lang="ts">
+import type { Post } from '~/types';
+
 definePageMeta({
   middleware: "sanctum:auth",
 });
-const { getPosts } = usePost();
-const posts = ref<any[]>([]);
-const loading = ref(true);
-const loadingMore = ref(false);
-const isOpenModal = ref(false);
-const currentPage = ref(1);
-const hasMore = ref(true);
+
+const uiStore = useUIStore();
+const { posts, loading, loadingMore, hasMore, loadPosts, loadMore, addPost } = usePostList();
 const loadTrigger = ref<HTMLElement | null>(null);
-
-const loadPosts = async (page: number = 1, append: boolean = false) => {
-  if (append && loadingMore.value) return;
-  
-  if (append) {
-    loadingMore.value = true;
-  } else {
-    loading.value = true;
-  }
-  
-  const result = await getPosts(page);
-  
-  if (result && result.posts) {
-    if (append) {
-      posts.value = [...posts.value, ...result.posts];
-    } else {
-      posts.value = result.posts;
-    }
-    
-    if (result.pagination) {
-      hasMore.value = result.pagination.current_page < result.pagination.last_page;
-      currentPage.value = result.pagination.current_page;
-    } else {
-      hasMore.value = false;
-    }
-  }
-  
-  loading.value = false;
-  loadingMore.value = false;
-};
-
-const loadMore = () => {
-  if (hasMore.value && !loadingMore.value) {
-    loadPosts(currentPage.value + 1, true);
-  }
-};
 
 onMounted(async () => {
   await loadPosts();
   
-  if (process.client) {
+  if (import.meta.client) {
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
+      if (entries[0]?.isIntersecting) {
         loadMore();
       }
     }, { threshold: 0.1 });
@@ -67,8 +29,8 @@ onMounted(async () => {
   }
 });
 
-const handleNewPost = (newPost: any) => {
-  posts.value = [newPost, ...posts.value];
+const handleNewPost = (newPost: Post) => {
+  addPost(newPost);
 };
 </script>
 
@@ -85,7 +47,7 @@ const handleNewPost = (newPost: any) => {
           <div>
             <button
               class="cursor-pointer text-sm font-medium text-lightGray dark:text-lightGray/70"
-              @click="() => (isOpenModal = true)"
+              @click="uiStore.openCreatePostModal()"
             >
               Start a thread...
             </button>
@@ -94,7 +56,7 @@ const handleNewPost = (newPost: any) => {
         <div>
           <button
             class="text-[12px] font-bold border dark:text-white/80 dark:border-lightGray/40 rounded-md py-[3px] px-[10px]"
-            @click="() => (isOpenModal = true)"
+            @click="uiStore.openCreatePostModal()"
           >
             Post
           </button>
@@ -103,9 +65,9 @@ const handleNewPost = (newPost: any) => {
     </Card>
 
     <ModalCreatePost
-      :is-open="isOpenModal"
-      @closeModal="() => (isOpenModal = false)"
-      @openModal="() => (isOpenModal = true)"
+      :is-open="uiStore.isCreatePostModalOpen"
+      @closeModal="uiStore.closeCreatePostModal()"
+      @openModal="uiStore.openCreatePostModal()"
       @created="loadPosts()"
     />
 
@@ -117,7 +79,7 @@ const handleNewPost = (newPost: any) => {
     </div>
     <div v-if="!loading && posts.length === 0">No posts yet</div>
     <div class="divide-y divide-gray-300 dark:divide-darkGray">
-      <LoaderSkeleton v-for="i in 3" :loading="loading" />
+      <LoaderSkeleton v-for="i in 3" :key="i" :loading="loading" />
     </div>
     
     <div ref="loadTrigger" class="py-4 text-center">

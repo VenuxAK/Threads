@@ -1,31 +1,41 @@
-<script setup>
-const props = defineProps({
-  isOpen: {
-    required: true,
-    default: true,
-  },
-});
-const emit = defineEmits(["closeModal", "openModal", "created"]);
-const user = useSanctumUser();
+<script setup lang="ts">
+const props = defineProps<{
+  isOpen: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'closeModal'): void;
+  (e: 'openModal'): void;
+  (e: 'created'): void;
+}>();
+
+const user = useSanctumUser<{ username?: string }>();
 const content = ref("");
 
-function closeModal() {
+const closeModal = () => {
   emit("closeModal");
-}
-function openModal() {
+};
+
+const openModal = () => {
   emit("openModal");
-}
+};
+
 const { createPost } = usePost();
-const error = ref(null);
+const error = ref<Record<string, string[]> | null>(null);
+const loading = ref(false);
+
 const onCreatePost = async () => {
   try {
+    loading.value = true;
     await createPost(content.value);
     error.value = null;
     content.value = "";
     emit("closeModal");
     emit("created");
   } catch (err) {
-    error.value = err;
+    error.value = err as Record<string, string[]>;
+  } finally {
+    loading.value = false;
   }
 };
 </script>
@@ -66,16 +76,16 @@ const onCreatePost = async () => {
                 <div class="flex flex-col space-y-6">
                   <div class="flex space-x-5 items-start">
                     <div class="">
-                       <NuxtLink :href="user ? `/@${user.username}` : ''">
+                       <NuxtLink :href="user?.username ? `/@${user.username}` : ''">
                         <Avatar class="w-10" />
                       </NuxtLink>
                     </div>
                     <div class="flex-1">
                       <NuxtLink
-                         :href="user ? `/@${user.username}` : ''"
+                         :href="user?.username ? `/@${user.username}` : ''"
                         class="font-bold text-sm"
                       >
-                        <p>{{ user.username }}</p>
+                        <p>{{ user?.username }}</p>
                       </NuxtLink>
                       <div>
                         <form class="">
@@ -95,28 +105,22 @@ const onCreatePost = async () => {
                       <div class="flex space-x-6 mt-4">
                         <div>
                           <label for="upload">
-                            <!-- class="flex flex-col items-center gap-2 cursor-pointer" -->
                             <Icon
                               name="ph:file-image-bold"
                               class="cursor-pointer"
                             />
-                            <!-- class="h-10 w-10 fill-white stroke-indigo-500" -->
                           </label>
                           <input id="upload" type="file" class="hidden" />
                         </div>
                         <div>
                           <label for="upload">
-                            <!-- class="flex flex-col items-center gap-2 cursor-pointer" -->
                             <Icon name="fa:smile-o" class="cursor-pointer" />
-                            <!-- class="h-10 w-10 fill-white stroke-indigo-500" -->
                           </label>
                           <input id="upload" type="file" class="hidden" />
                         </div>
                         <div>
                           <label for="upload">
-                            <!-- class="flex flex-col items-center gap-2 cursor-pointer" -->
                             <Icon name="ph:hash-bold" class="cursor-pointer" />
-                            <!-- class="h-10 w-10 fill-white stroke-indigo-500" -->
                           </label>
                           <input id="upload" type="file" class="hidden" />
                         </div>
@@ -128,8 +132,8 @@ const onCreatePost = async () => {
                       <p>Anyone can reply</p>
                     </div>
                     <div>
-                      <button @click="onCreatePost" class="btn-create">
-                        Post
+                      <button @click="onCreatePost" :disabled="loading" class="btn-create">
+                        {{ loading ? 'Posting...' : 'Post' }}
                       </button>
                     </div>
                   </div>

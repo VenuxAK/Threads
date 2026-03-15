@@ -1,26 +1,19 @@
+<script lang="ts" setup>
+import type { Post } from '~/types';
+
+defineProps<{
+  posts: Post[];
+  loading?: boolean;
+}>();
+</script>
+
 <template>
   <div>
     <div class="divide-y divide-darkGray">
-      <LoaderSkeleton v-for="i in 2" :loading="!loading" />
+      <LoaderSkeleton v-for="i in 2" :key="i" :loading="!loading" />
     </div>
     <div class="divide-y divide-darkGray">
-      <Post v-for="post in posts" :key="post" :post="post" />
+      <Post v-for="post in posts" :key="post.id" :post="post" />
     </div>
   </div>
 </template>
-
-<script lang="ts" setup>
-// const props = defineProps(["posts", "loading"]);
-const props = defineProps({
-  posts: {
-    required: true,
-    type: Array,
-  },
-  loading: {
-    required: false,
-    type: Boolean,
-  },
-});
-</script>
-
-<style></style>

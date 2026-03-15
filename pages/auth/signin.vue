@@ -15,7 +15,7 @@ const credentials = ref<SignInUser>({
   email: "",
   password: "",
 });
-const error = ref<Object | null>(null);
+const error = ref<Record<string, string[]> | null>(null);
 let loading = ref<boolean>(false);
 
 const onSignIn = async () => {

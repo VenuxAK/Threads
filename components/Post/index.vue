@@ -1,19 +1,15 @@
 <script lang="ts" setup>
-const { showReplied, post } = defineProps({
-  post: {
-    required: true,
-    type: Object,
-  },
-  showReplied: {
-    default: false,
-  },
-});
+import type { Post } from '~/types';
+
+const props = defineProps<{
+  post: Post;
+  showReplied?: boolean;
+}>();
 
 const { sanitizeWithHashtags } = useSanitize();
 
-// Computed property to format hashtags and preserve line breaks with sanitization
 const formattedCaption = computed(() => {
-  return sanitizeWithHashtags(post.content);
+  return sanitizeWithHashtags(props.post.content);
 });
 </script>
 
@@ -21,11 +17,11 @@ const formattedCaption = computed(() => {
   <Card class="post-card" v-if="post">
     <PostHeader :post="post" />
     <div class="card-content">
-       <NuxtLink :href="post.author && post.author.username ? `/@${post.author.username}/posts/${post.id}` : ''">
+       <NuxtLink :href="post.author?.username ? `/@${post.author.username}/posts/${post.id}` : ''">
         <div v-html="formattedCaption"></div>
       </NuxtLink>
     </div>
-    <PostFooter />
+    <PostFooter :post="post" />
     <PostReplied v-if="showReplied" />
   </Card>
 </template>

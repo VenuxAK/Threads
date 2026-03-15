@@ -20,17 +20,24 @@ const credentials = ref<UserCredentials>({
 const error = ref<any>(null);
 const loading = ref<boolean>(false);
 const isReset = ref<boolean>(false);
-const email = route.query.email;
-const token = route.params.token;
+const email = computed(() => {
+  const q = route.query.email;
+  if (!q) return null;
+  return Array.isArray(q) ? q[0] : q;
+});
+const token = computed(() => {
+  const t = route.params.token;
+  return Array.isArray(t) ? t[0] : t || '';
+});
 const onResetPassword = async () => {
   try {
     loading.value = true;
     error.value = null;
     await resetPassword(
-      email,
+      email.value || null,
       credentials.value.password,
       credentials.value.password_confirmation,
-      token
+      token.value || ''
     );
     loading.value = false;
     isReset.value = true;

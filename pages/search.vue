@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import type { User, Post } from '~/types';
+
 definePageMeta({
   middleware: "sanctum:auth",
 });
@@ -6,9 +8,9 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 const { search: searchUsersAndPosts } = usePost();
-const search = ref<any>("");
-const posts = ref<Array<any>>([]);
-const users = ref<Array<Object>>([]);
+const search = ref<string>("");
+const posts = ref<Post[]>([]);
+const users = ref<User[]>([]);
 const loading = ref(false);
 const showPosts = ref(route.query.q ? true : false);
 const regex = /^$/;
@@ -17,8 +19,7 @@ const onSearchSubmit = async () => {
   if (!regex.test(search.value)) {
     loading.value = true;
     const response = await searchUsersAndPosts(search.value);
-    users.value = response?.users;
-    // console.log(posts.value);
+    users.value = response?.users || [];
     loading.value = false;
   }
 };
@@ -27,7 +28,7 @@ const onSearchPosts = async () => {
   showPosts.value = true;
   loading.value = true;
   const response = await searchUsersAndPosts(search.value, true);
-  posts.value = response.posts;
+  posts.value = response?.posts || [];
   loading.value = false;
 };
 
@@ -37,24 +38,16 @@ const onBack = () => {
   search.value = "";
   router.push("/search");
 };
-
-// watch(showPosts, async () => {
-//   const response = await searchUsersAndPosts(search.value, true);
-//   posts.value = response.posts;
-//   // console.log(posts.value);
-// });
 </script>
 
 <template>
   <div>
-    <!-- User -->
     <div>
       <form
         v-if="!showPosts"
         @submit.prevent="onSearchSubmit"
         class="px-5 mx-auto mt-5"
       >
-        <!-- v-if="!showPosts" -->
         <div class="relative">
           <div
             class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none"
@@ -77,7 +70,6 @@ const onBack = () => {
         <button @click="onBack">Back</button>
       </div>
 
-      <!-- Posts -->
       <div>
         <div class="px-5 mt-5">
           <div>
@@ -119,16 +111,12 @@ const onBack = () => {
         </div>
       </div>
 
-      <!-- User profile cards -->
       <div
         class="divide-y divide-gray-300 dark:divide-darkGray mt-5"
         v-if="users.length"
       >
-        <!-- v-if="users.length && !posts.length && !showPosts" -->
         <ProfileCard v-for="user in users" :key="user.username" :user="user" />
       </div>
     </div>
   </div>
 </template>
-
-<style></style>

@@ -1,14 +1,17 @@
 <script lang="ts" setup>
+import { capitalize } from '~/utils/capitalize';
+
 const route = useRoute();
 const routeName = computed(() => {
-  // route.name == "index" ? "For you" : useUseCaptitalize(route.name)
-  if (route.name == "index") {
+  const name = route.name;
+  if (name === "index") {
     return "For you";
-  } else if (route.name.startsWith("@")) {
+  } else if (typeof name === "string" && name.startsWith("@")) {
     return "Profile";
-  } else {
-    return useCaptitalize(route.name);
+  } else if (typeof name === "string") {
+    return capitalize(name);
   }
+  return "Threads";
 });
 
 const items = ref([
