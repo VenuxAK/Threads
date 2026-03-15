@@ -1,75 +1,75 @@
-# Nuxt 3 Minimal Starter
+# Threads Clone (Nuxt 4 + Laravel)
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+A Threads clone built with Nuxt 4 and Laravel API backend.
+
+## Tech Stack
+
+- **Frontend:** Nuxt 4, TypeScript, TailwindCSS
+- **State Management:** Pinia
+- **Authentication:** Sanctum (Laravel)
+- **Backend:** Laravel API (separate repo)
+
+## Prerequisites
+
+- Node.js 18+
+- Bun (recommended) or npm
+- Laravel backend running on `http://localhost:8000`
 
 ## Setup
 
-Make sure to install the dependencies:
-
 ```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
+# Install dependencies
 bun install
-```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
-yarn dev
-
-# bun
+# Start development server
 bun run dev
 ```
 
-## Production
+The app will be available at `http://localhost:3000`
 
-Build the application for production:
+## Environment
 
-```bash
-# npm
-npm run build
+Configure your Laravel API URL in `nuxt.config.ts`:
 
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+```ts
+sanctum: {
+  baseUrl: "http://localhost:8000",
+}
 ```
 
-Locally preview production build:
+## Scripts
 
 ```bash
-# npm
-npm run preview
+# Development
+bun run dev
 
-# pnpm
-pnpm run preview
+# Build for production
+bun run build
 
-# yarn
-yarn preview
-
-# bun
+# Preview production build
 bun run preview
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Project Structure
+
+```
+├── components/     # Vue components
+├── composables/    # Vue composables
+├── layouts/       # Nuxt layouts
+├── pages/         # Nuxt pages
+├── stores/        # Pinia stores
+├── types/         # TypeScript interfaces
+└── utils/         # Utility functions
+```
+
+## Features
+
+- User authentication (Laravel Sanctum)
+- Create, view posts
+- User profiles
+- Infinite scroll pagination
+- Dark mode support
+
+## License
+
+MIT
