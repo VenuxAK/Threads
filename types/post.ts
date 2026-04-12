@@ -1,19 +1,40 @@
 export interface Author {
-  id: number;
+  id: number | string;
   name: string;
   username: string;
   avatar?: string;
+  bio?: string;
 }
 
 export interface Post {
-  id: number;
+  id: number | string;
   content: string;
   author: Author;
   published_at: string;
+  edited_at?: string;
   likes?: number;
   comments?: number;
   reposts?: number;
-  parent_id?: number;
+  is_liked?: boolean;
+  parent_id?: number | string;
+  tags?: string[];
+  interactions?: {
+    likes: number;
+    comments: number;
+    shares: number;
+  };
+}
+
+export interface Comment {
+  id: string | number;
+  content: string;
+  post_id: string | number;
+  parent_id?: string | number;
+  created_at: string;
+  author: Author;
+  reply_count?: number;
+  replies?: Comment[];
+  showReplies?: boolean;
 }
 
 export interface Pagination {

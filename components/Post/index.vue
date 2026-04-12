@@ -6,11 +6,19 @@ const props = defineProps<{
   showReplied?: boolean;
 }>();
 
+const emit = defineEmits<{
+  openComments: [];
+}>();
+
 const { sanitizeWithHashtags } = useSanitize();
 
 const formattedCaption = computed(() => {
   return sanitizeWithHashtags(props.post.content);
 });
+
+const handleOpenComments = () => {
+  emit('openComments');
+};
 </script>
 
 <template>
@@ -21,7 +29,7 @@ const formattedCaption = computed(() => {
         <div v-html="formattedCaption"></div>
       </NuxtLink>
     </div>
-    <PostFooter :post="post" />
+    <PostFooter :post="post" @open-comments="handleOpenComments" />
     <PostReplied v-if="showReplied" />
   </Card>
 </template>

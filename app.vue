@@ -6,6 +6,10 @@ const indicator = ref({
   color:
     "repeating-linear-gradient(to right, rgb(0, 220, 130) 0%, rgb(52, 205, 254) 50%, rgb(0, 71, 225) 100%)",
 });
+
+// Initialize liked posts from backend API when auth state is known
+// The backend will provide like status for each post
+// No localStorage needed for like tracking
 </script>
 <template>
   <NuxtLoadingIndicator :height="indicator.height" :color="indicator.color" />

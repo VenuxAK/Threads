@@ -5,6 +5,7 @@ const UNAUTHORIZE_ERROR_CODE = 401;
 const FORBIDDEN_ERROR_CODE = 403;
 const NOT_FOUND_ERROR_CODE = 404;
 const VALIDATION_ERROR_CODE = 422;
+const RATE_LIMIT_ERROR_CODE = 429;
 const SERVER_ERROR_CODE = 500;
 
 export const useApiError = (error: any) => {
@@ -19,6 +20,8 @@ export const useApiError = (error: any) => {
     isFetchError && error.response?.status === NOT_FOUND_ERROR_CODE;
   const isValidationError =
     isFetchError && error.response?.status === VALIDATION_ERROR_CODE;
+  const isRateLimitError =
+    isFetchError && error.response?.status === RATE_LIMIT_ERROR_CODE;
 
   const code = isFetchError ? error.response?.status : SERVER_ERROR_CODE;
   const bag: Record<string, string[]> = isValidationError
@@ -31,6 +34,7 @@ export const useApiError = (error: any) => {
     isUnauthorizeError,
     isUnknownError,
     isForbiddenError,
+    isRateLimitError,
     code,
     bag,
   };

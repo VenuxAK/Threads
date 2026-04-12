@@ -1,30 +1,48 @@
 <script setup lang="ts">
-import type { Post } from '~/types';
+import type { Post } from "~/types";
+// import { LoaderSkeleton } from "../.nuxt/components";
 
 definePageMeta({
   middleware: "sanctum:auth",
 });
 
 const uiStore = useUIStore();
-const { posts, loading, loadingMore, hasMore, loadPosts, loadMore, addPost } = usePostList();
+const { posts, loading, loadingMore, hasMore, loadPosts, loadMore, addPost } =
+  usePostList();
 const loadTrigger = ref<HTMLElement | null>(null);
+
+const selectedPost = ref<Post | null>(null);
+const isCommentsModalOpen = ref(false);
+
+const openComments = (post: Post) => {
+  selectedPost.value = post;
+  isCommentsModalOpen.value = true;
+};
+
+const closeComments = () => {
+  isCommentsModalOpen.value = false;
+  selectedPost.value = null;
+};
 
 onMounted(async () => {
   await loadPosts();
-  
+
   if (import.meta.client) {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0]?.isIntersecting) {
-        loadMore();
-      }
-    }, { threshold: 0.1 });
-    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
     nextTick(() => {
       if (loadTrigger.value) {
         observer.observe(loadTrigger.value);
       }
     });
-    
+
     onUnmounted(() => observer.disconnect());
   }
 });
@@ -75,17 +93,38 @@ const handleNewPost = (newPost: Post) => {
       class="w-full divide-y divide-gray-300 dark:divide-darkGray"
       v-if="posts && posts.length > 0"
     >
-      <Post v-for="post in posts" :key="post.id" :post="post" />
+      <Post
+        v-for="post in posts"
+        :key="post.id"
+        :post="post"
+        @open-comments="openComments(post)"
+      />
     </div>
     <div v-if="!loading && posts.length === 0">No posts yet</div>
     <div class="divide-y divide-gray-300 dark:divide-darkGray">
-      <LoaderSkeleton v-for="i in 3" :key="i" :loading="loading" />
+      <LoaderSkeleton v-for="i in 5" :key="i" :loading="loading" />
     </div>
-    
+
     <div ref="loadTrigger" class="py-4 text-center">
-      <div v-if="loadingMore" class="text-sm text-gray-500">Loading more...</div>
-      <div v-else-if="!hasMore && posts.length > 0" class="text-sm text-gray-500">No more posts</div>
+      <div v-if="loadingMore" class="text-sm text-gray-500">
+        <!-- Loading more... -->
+        <Loader />
+      </div>
+      <div
+        v-else-if="!hasMore && posts.length > 0"
+        class="text-sm text-gray-500"
+      >
+        No more posts
+      </div>
     </div>
+
+    <!-- Comments Modal -->
+    <PostCommentsModal
+      v-if="selectedPost"
+      :post="selectedPost"
+      :is-open="isCommentsModalOpen"
+      @close="closeComments"
+    />
   </div>
 </template>
 

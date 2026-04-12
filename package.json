@@ -24,6 +24,7 @@
     "vue": "latest"
   },
   "devDependencies": {
+    "@iconify-json/carbon": "^1.2.20",
     "@iconify-json/ci": "^1.1.14",
     "@iconify-json/gg": "^1.1.10",
     "@iconify-json/gravity-ui": "^1.1.5",

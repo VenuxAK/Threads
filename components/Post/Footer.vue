@@ -1,38 +1,100 @@
 <script lang="ts" setup>
-const props = defineProps({
-  post: {
-    required: false, // Update to true later
-    type: Object,
+import type { Post } from "~/types";
+
+const props = defineProps<{
+  post: Post;
+  showComments?: boolean;
+}>();
+
+const emit = defineEmits<{
+  openComments: [];
+}>();
+
+const postsStore = usePostsStore();
+const { likePost } = useLike();
+
+// Track local like state (prioritize prop from API, fallback to store)
+const isLiked = ref(
+  props.post.is_liked ?? postsStore.isPostLiked(props.post.id.toString()),
+);
+const likesCount = ref(props.post.likes ?? 0);
+const isProcessing = ref(false);
+
+// Sync local state when prop changes (e.g., after page refresh)
+watch(
+  () => props.post.is_liked,
+  (newVal) => {
+    if (newVal !== undefined) {
+      isLiked.value = newVal;
+    }
   },
-});
+);
+
+const handleLike = async () => {
+  if (isProcessing.value) return;
+
+  isProcessing.value = true;
+  const wasLiked = isLiked.value;
+
+  // Optimistic update
+  isLiked.value = !wasLiked;
+
+  try {
+    const result = await likePost(props.post.id);
+
+    if (result.success) {
+      likesCount.value = result.likesCount;
+      postsStore.updatePostLikes(props.post.id, result.likesCount);
+      // Sync with server state (toggle behavior)
+      isLiked.value = result.liked;
+      postsStore.toggleLike(props.post.id.toString(), result.liked);
+    } else {
+      // Revert on error
+      isLiked.value = wasLiked;
+      postsStore.toggleLike(props.post.id.toString(), wasLiked);
+    }
+  } catch (err) {
+    // Revert on error
+    isLiked.value = wasLiked;
+    postsStore.toggleLike(props.post.id.toString(), wasLiked);
+  } finally {
+    isProcessing.value = false;
+  }
+};
+
+const handleOpenComments = () => {
+  emit("openComments");
+};
 </script>
 
 <template>
   <div class="card-footer">
     <div>
-      <button>
-        <Icon name="ph:heart-bold" size="17px" />
-        <span>{{ post?.likes ?? "" }}</span>
+      <!-- :class="{ 'text-red-500': isLiked }" -->
+      <button :disabled="isProcessing" @click="handleLike">
+        <Icon
+          :name="isLiked ? 'ph:heart-fill' : 'ph:heart-bold'"
+          size="17px"
+          :class="{ 'text-red-500': isLiked }"
+        />
+        <span>{{ likesCount }}</span>
       </button>
     </div>
     <div>
-      <button>
-        <Icon name="ant-design:message-outlined" size="17px" />
+      <button @click="handleOpenComments">
+        <Icon name="ph:chat-circle-bold" size="17px" />
         <span>{{ post?.comments ?? "" }}</span>
       </button>
     </div>
     <div>
       <button>
-        <Icon name="akar-icons:arrow-repeat" size="17px" />
+        <Icon name="ph:repeat-bold" size="17px" />
         <span>{{ post?.reposts ?? "" }}</span>
       </button>
     </div>
-    <div>
-      <button>
-        <Icon name="lucide:send" size="17px" />
-        <span></span>
-      </button>
-    </div>
+    <!-- <div>
+      <Icon name="ph:paper-plane-right-bold" size="17px" />
+    </div> -->
   </div>
 </template>
 

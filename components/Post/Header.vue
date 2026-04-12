@@ -31,7 +31,7 @@ const props = defineProps({
       <HeadlessMenu as="div" class="relative inline-block text-left">
         <div>
           <HeadlessMenuButton class="focus:outline-none">
-            <Icon name="solar:menu-dots-bold" size="20px" />
+            <Icon name="ph:dots-three-bold" size="20px" />
           </HeadlessMenuButton>
         </div>
         <PostHeaderMenu />
