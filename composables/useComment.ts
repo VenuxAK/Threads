@@ -57,10 +57,24 @@ export const useComment = () => {
     }
   };
 
+  /** Full flat thread (all nested levels) under one top-level comment */
+  const getCommentThread = async (commentId: string | number): Promise<{ data: Comment[]; error: string | null }> => {
+    try {
+      const response: any = await client(`/api/v1/comments/${commentId}/thread`);
+      return { data: response.data?.thread ?? [], error: null };
+    } catch (err: any) {
+      console.error('Failed to fetch comment thread:', err);
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Failed to fetch comment thread';
+      return { data: [], error: errorMessage };
+    }
+  };
+
   return {
     getComments,
     createComment,
     deleteComment,
     getReplies,
+    getCommentThread,
   };
 };

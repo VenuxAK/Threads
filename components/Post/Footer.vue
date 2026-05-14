@@ -44,7 +44,7 @@ const handleLike = async () => {
 
     if (result.success) {
       likesCount.value = result.likesCount;
-      postsStore.updatePostLikes(props.post.id, result.likesCount);
+      postsStore.updatePostLikes(props.post.id.toString(), result.likesCount);
       // Sync with server state (toggle behavior)
       isLiked.value = result.liked;
       postsStore.toggleLike(props.post.id.toString(), result.liked);

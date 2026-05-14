@@ -33,8 +33,12 @@ export interface Comment {
   created_at: string;
   author: Author;
   reply_count?: number;
+  /** Flat thread under a top-level comment (from GET …/comments/{id}/thread) */
+  threadItems?: Comment[];
   replies?: Comment[];
   showReplies?: boolean;
+  /** Shown when this reply is to another reply (not the root comment) */
+  replying_to?: { username: string } | null;
 }
 
 export interface Pagination {
