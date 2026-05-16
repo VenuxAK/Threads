@@ -16,12 +16,14 @@ export interface Post {
   comments?: number;
   reposts?: number;
   is_liked?: boolean;
+  is_reposted?: boolean;
   parent_id?: number | string;
   tags?: string[];
   interactions?: {
     likes: number;
     comments: number;
     shares: number;
+    reposts: number;
   };
 }
 

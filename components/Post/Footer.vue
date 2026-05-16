@@ -12,6 +12,7 @@ const emit = defineEmits<{
 
 const postsStore = usePostsStore();
 const { likePost } = useLike();
+const { toggleRepost } = useRepost();
 
 // Track local like state (prioritize prop from API, fallback to store)
 const isLiked = ref(
@@ -20,12 +21,36 @@ const isLiked = ref(
 const likesCount = ref(props.post.likes ?? 0);
 const isProcessing = ref(false);
 
+const isReposted = ref(
+  props.post.is_reposted ?? postsStore.isPostReposted(props.post.id.toString()),
+);
+const repostsCount = ref(props.post.reposts ?? 0);
+const isRepostProcessing = ref(false);
+
 // Sync local state when prop changes (e.g., after page refresh)
 watch(
   () => props.post.is_liked,
   (newVal) => {
     if (newVal !== undefined) {
       isLiked.value = newVal;
+    }
+  },
+);
+
+watch(
+  () => props.post.is_reposted,
+  (newVal) => {
+    if (newVal !== undefined) {
+      isReposted.value = newVal;
+    }
+  },
+);
+
+watch(
+  () => props.post.reposts,
+  (newVal) => {
+    if (newVal !== undefined) {
+      repostsCount.value = newVal;
     }
   },
 );
@@ -65,6 +90,49 @@ const handleLike = async () => {
 const handleOpenComments = () => {
   emit("openComments");
 };
+
+const handleRepost = async () => {
+  if (isRepostProcessing.value) {
+    return;
+  }
+
+  isRepostProcessing.value = true;
+  const wasReposted = isReposted.value;
+
+  isReposted.value = !wasReposted;
+  repostsCount.value = Math.max(
+    0,
+    repostsCount.value + (wasReposted ? -1 : 1),
+  );
+
+  try {
+    const result = await toggleRepost(props.post.id);
+
+    if (result.success) {
+      repostsCount.value = result.repostsCount;
+      isReposted.value = result.reposted;
+      postsStore.updatePostReposts(
+        props.post.id.toString(),
+        result.repostsCount,
+      );
+      postsStore.toggleRepost(props.post.id.toString(), result.reposted);
+    } else {
+      isReposted.value = wasReposted;
+      repostsCount.value = Math.max(
+        0,
+        repostsCount.value + (wasReposted ? 1 : -1),
+      );
+    }
+  } catch {
+    isReposted.value = wasReposted;
+    repostsCount.value = Math.max(
+      0,
+      repostsCount.value + (wasReposted ? 1 : -1),
+    );
+  } finally {
+    isRepostProcessing.value = false;
+  }
+};
 </script>
 
 <template>
@@ -87,9 +155,16 @@ const handleOpenComments = () => {
       </button>
     </div>
     <div>
-      <button>
-        <Icon name="ph:repeat-bold" size="17px" />
-        <span>{{ post?.reposts ?? "" }}</span>
+      <button
+        :disabled="isRepostProcessing"
+        @click="handleRepost"
+      >
+        <Icon
+          name="ph:repeat-bold"
+          size="17px"
+          :class="{ 'text-emerald-600 dark:text-emerald-400': isReposted }"
+        />
+        <span>{{ repostsCount }}</span>
       </button>
     </div>
     <!-- <div>

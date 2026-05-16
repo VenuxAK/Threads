@@ -6,7 +6,7 @@ export const useAuth = () => {
 
   const user = computed(() => {
     const _user: any = useSanctumUser();
-    return _user.value.data;
+    return _user.value?.data ?? null;
   });
 
   const signUp = async (name: string, email: string, password: string) => {

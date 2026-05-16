@@ -107,6 +107,8 @@ const fetchComments = async () => {
     if (error) {
       errorMessage.value = error;
       console.error("Error fetching comments:", error);
+      comments.value = [];
+      return;
     }
     comments.value = fetchedComments.map((c: Comment) => ({
       ...c,
@@ -277,9 +279,14 @@ const toggleShowReplies = async (commentId: string) => {
     return;
   }
   delete replyErrors.value[commentId];
+  const wasHidden = !comment.showReplies;
   comment.showReplies = !comment.showReplies;
   if (comment.showReplies) {
-    await loadCommentThread(commentId);
+    try {
+      await loadCommentThread(commentId);
+    } catch {
+      comment.showReplies = false;
+    }
   }
 };
 

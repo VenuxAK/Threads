@@ -1,12 +1,18 @@
 <script lang="ts" setup>
-import type { User, Post } from '~/types';
+import type { User, Post, Pagination } from '~/types';
 
 definePageMeta({
   middleware: "sanctum:auth",
 });
 
 const { user: authUser } = useAuth();
-const { getUserPosts, getUserAndPosts, getUser } = useUser();
+const {
+  getUserPosts,
+  getUserAndPosts,
+  getUser,
+  getMyReposts,
+  getUserReposts,
+} = useUser();
 const route = useRoute();
 
 const getUsernameParam = (): string => {
@@ -34,29 +40,92 @@ const { posts, loading, loadingMore, hasMore, loadPosts, loadMore } = usePostLis
   }
 });
 
+const repostPosts = ref<Post[]>([]);
+const repostPagination = ref<Pagination | null>(null);
+const repostCurrentPage = ref(1);
+const repostHasMore = ref(true);
+const repostLoading = ref(false);
+const repostLoadingMore = ref(false);
+const repostsFetched = ref(false);
+
+const fetchReposts = async (page: number, append: boolean) => {
+  if (append && repostLoadingMore.value) return;
+  if (append) {
+    repostLoadingMore.value = true;
+  } else {
+    repostLoading.value = true;
+  }
+
+  try {
+    const isOwn = authUser.value?.username === user.value.username;
+    const result = isOwn
+      ? await getMyReposts(page)
+      : await getUserReposts(usernameStr, page);
+
+    if (append) {
+      repostPosts.value = [...repostPosts.value, ...result.posts];
+    } else {
+      repostPosts.value = result.posts;
+    }
+    repostPagination.value = result.pagination;
+    if (result.pagination) {
+      repostHasMore.value =
+        result.pagination.current_page < result.pagination.last_page;
+      repostCurrentPage.value = result.pagination.current_page;
+    } else {
+      repostHasMore.value = false;
+    }
+  } catch (e) {
+    console.error(e);
+  } finally {
+    repostLoading.value = false;
+    repostLoadingMore.value = false;
+  }
+};
+
+const loadMoreReposts = () => {
+  if (repostHasMore.value && !repostLoadingMore.value) {
+    fetchReposts(repostCurrentPage.value + 1, true);
+  }
+};
+
 const loadTrigger = ref<HTMLElement | null>(null);
 
 const tab = ref<'posts' | 'reposts'>('posts');
-const toggleTab = (_tab: 'posts' | 'reposts') => {
-  tab.value = _tab;
+
+const toggleTab = async (t: 'posts' | 'reposts') => {
+  if (t === 'reposts' && !repostsFetched.value) {
+    repostsFetched.value = true;
+    repostLoading.value = true;
+    tab.value = t;
+    await fetchReposts(1, false);
+    return;
+  }
+  tab.value = t;
 };
 
 onMounted(async () => {
   await loadPosts();
-  
+
   if (import.meta.client) {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0]?.isIntersecting) {
-        loadMore();
-      }
-    }, { threshold: 0.1 });
-    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting) return;
+        if (tab.value === 'posts') {
+          loadMore();
+        } else {
+          loadMoreReposts();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
     nextTick(() => {
       if (loadTrigger.value) {
         observer.observe(loadTrigger.value);
       }
     });
-    
+
     onUnmounted(() => observer.disconnect());
   }
 });
@@ -137,16 +206,37 @@ onMounted(async () => {
         <ProfilePostsList
           :posts="posts"
           v-if="tab == 'posts'"
-          :loading="!loading"
+          :loading="loading"
         />
 
-        <ProfileRepostsList :posts="user.reposts" v-if="tab == 'reposts'" />
+        <ProfileRepostsList
+          v-if="tab == 'reposts'"
+          :posts="repostPosts"
+          :loading="repostLoading"
+        />
       </div>
     </div>
     
     <div ref="loadTrigger" class="py-4 text-center">
-      <div v-if="loadingMore" class="text-sm text-gray-500">Loading more...</div>
-      <div v-else-if="!hasMore && posts.length > 0" class="text-sm text-gray-500">No more posts</div>
+      <div v-if="tab === 'posts' && loadingMore" class="text-sm text-gray-500">Loading more...</div>
+      <div
+        v-else-if="tab === 'posts' && !hasMore && posts.length > 0"
+        class="text-sm text-gray-500"
+      >
+        No more posts
+      </div>
+      <div
+        v-else-if="tab === 'reposts' && repostLoadingMore"
+        class="text-sm text-gray-500"
+      >
+        Loading more…
+      </div>
+      <div
+        v-else-if="tab === 'reposts' && !repostHasMore && repostPosts.length > 0"
+        class="text-sm text-gray-500"
+      >
+        No more reposts
+      </div>
     </div>
   </div>
 </template>

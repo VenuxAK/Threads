@@ -54,10 +54,37 @@ export const useUser = () => {
     }
   };
 
+  const getMyReposts = async (page: number = 1): Promise<{ posts: Post[]; pagination: Pagination | null }> => {
+    try {
+      const response: any = await client(`/api/v1/me/reposts?page=${page}`, {
+        credentials: "include",
+      });
+      return parseUserPostsResponse(response);
+    } catch (err) {
+      console.error(err);
+      return { posts: [], pagination: null };
+    }
+  };
+
+  const getUserReposts = async (username: string, page: number = 1): Promise<{ posts: Post[]; pagination: Pagination | null }> => {
+    try {
+      const response: any = await client(
+        `/api/v1/users/${username}?reposts=include&page=${page}`,
+        { credentials: "include" },
+      );
+      return parseUserPostsResponse(response);
+    } catch (err) {
+      console.error(err);
+      return { posts: [], pagination: null };
+    }
+  };
+
   return {
     getUser,
     getUserPosts,
     getUserAndPosts,
+    getMyReposts,
+    getUserReposts,
   };
 };
 

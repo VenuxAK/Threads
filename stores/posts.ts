@@ -10,6 +10,7 @@ interface PostsState {
   loadingMore: boolean;
   error: string | null;
   likedPosts: Set<string>;
+  repostedPosts: Set<string>;
 }
 
 export const usePostsStore = defineStore('posts', {
@@ -22,22 +23,33 @@ export const usePostsStore = defineStore('posts', {
     loadingMore: false,
     error: null,
     likedPosts: new Set<string>(),
+    repostedPosts: new Set<string>(),
   }),
 
   hydrate(state) {
     // Initialize with empty liked posts - backend will provide actual like state
     state.likedPosts = new Set<string>();
+    state.repostedPosts = new Set<string>();
   },
 
   getters: {
     hasPosts: (state) => state.posts.length > 0,
     isEmpty: (state) => state.posts.length === 0 && !state.loading,
     isPostLiked: (state) => (postId: string) => state.likedPosts.has(postId.toString()),
+    isPostReposted: (state) => (postId: string) =>
+      state.repostedPosts.has(postId.toString()),
   },
 
   actions: {
     setPosts(posts: Post[], pagination: Pagination | null) {
       this.posts = posts;
+      posts.forEach((p) => {
+        if (p.is_reposted) {
+          this.repostedPosts.add(p.id.toString());
+        } else {
+          this.repostedPosts.delete(p.id.toString());
+        }
+      });
       this.pagination = pagination;
       if (pagination) {
         this.hasMore = pagination.current_page < pagination.last_page;
@@ -49,6 +61,13 @@ export const usePostsStore = defineStore('posts', {
 
     appendPosts(newPosts: Post[], pagination: Pagination | null) {
       this.posts = [...this.posts, ...newPosts];
+      newPosts.forEach((p) => {
+        if (p.is_reposted) {
+          this.repostedPosts.add(p.id.toString());
+        } else {
+          this.repostedPosts.delete(p.id.toString());
+        }
+      });
       this.pagination = pagination;
       if (pagination) {
         this.hasMore = pagination.current_page < pagination.last_page;
@@ -76,11 +95,43 @@ export const usePostsStore = defineStore('posts', {
       }
     },
 
+    updatePostReposts(postId: string, repostsCount: number) {
+      const postIndex = this.posts.findIndex(
+        (p) => p.id.toString() === postId.toString(),
+      );
+      if (postIndex !== -1 && this.posts[postIndex]) {
+        this.posts[postIndex].reposts = repostsCount;
+        if (this.posts[postIndex].interactions) {
+          this.posts[postIndex].interactions!.reposts = repostsCount;
+        }
+      }
+    },
+
+    toggleRepost(postId: string, reposted: boolean) {
+      if (reposted) {
+        this.repostedPosts.add(postId.toString());
+      } else {
+        this.repostedPosts.delete(postId.toString());
+      }
+      const postIndex = this.posts.findIndex(
+        (p) => p.id.toString() === postId.toString(),
+      );
+      if (postIndex !== -1 && this.posts[postIndex]) {
+        this.posts[postIndex].is_reposted = reposted;
+      }
+    },
+
     toggleLike(postId: string, liked: boolean) {
       if (liked) {
         this.likedPosts.add(postId.toString());
       } else {
         this.likedPosts.delete(postId.toString());
+      }
+      const postIndex = this.posts.findIndex(
+        (p) => p.id.toString() === postId.toString(),
+      );
+      if (postIndex !== -1 && this.posts[postIndex]) {
+        this.posts[postIndex].is_liked = liked;
       }
     },
 
@@ -105,6 +156,7 @@ export const usePostsStore = defineStore('posts', {
       this.loadingMore = false;
       this.error = null;
       this.likedPosts.clear();
+      this.repostedPosts.clear();
     },
 
     clearLikedPosts() {
