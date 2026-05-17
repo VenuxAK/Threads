@@ -31,8 +31,12 @@ export const usePostsStore = defineStore('posts', {
   actions: {
     setPosts(posts: Post[], pagination: Pagination | null) {
       this.posts = posts;
-      const interactions = useInteractionsStore();
-      interactions.syncFromPosts(posts);
+      try {
+        const interactions = useInteractionsStore();
+        interactions.syncFromPosts(posts);
+      } catch (e) {
+        console.warn('Failed to sync interactions:', e);
+      }
       this.pagination = pagination;
       if (pagination) {
         this.hasMore = pagination.current_page < pagination.last_page;
@@ -44,8 +48,12 @@ export const usePostsStore = defineStore('posts', {
 
     appendPosts(newPosts: Post[], pagination: Pagination | null) {
       this.posts = [...this.posts, ...newPosts];
-      const interactions = useInteractionsStore();
-      interactions.syncFromPosts(newPosts);
+      try {
+        const interactions = useInteractionsStore();
+        interactions.syncFromPosts(newPosts);
+      } catch (e) {
+        console.warn('Failed to sync interactions:', e);
+      }
       this.pagination = pagination;
       if (pagination) {
         this.hasMore = pagination.current_page < pagination.last_page;
