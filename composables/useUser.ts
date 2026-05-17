@@ -39,7 +39,7 @@ export const useUser = () => {
 
   const getUserAndPosts = async (username: string, page: number = 1): Promise<{ posts: Post[]; pagination: Pagination | null }> => {
     try {
-      const response: any = await client(`/api/v1/users/${username}?posts=include&page=${page}`, {
+      const response: any = await client(`/api/v1/users/${username}/posts?page=${page}`, {
         credentials: "include",
       });
       
@@ -69,7 +69,7 @@ export const useUser = () => {
   const getUserReposts = async (username: string, page: number = 1): Promise<{ posts: Post[]; pagination: Pagination | null }> => {
     try {
       const response: any = await client(
-        `/api/v1/users/${username}?reposts=include&page=${page}`,
+        `/api/v1/users/${username}/reposts?page=${page}`,
         { credentials: "include" },
       );
       return parseUserPostsResponse(response);
