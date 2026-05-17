@@ -1,5 +1,7 @@
 <script setup lang="ts">
-defineProps<{ user: Record<string, any> }>();
+import type { User } from '~/types';
+
+defineProps<{ user: User }>();
 
 const followUser = () => {
   console.log("Following");
@@ -27,7 +29,7 @@ const followUser = () => {
       </div>
     </div>
     <p class="ml-9 text-sm dark:text-lightGray/60">
-      <NuxtLink href="#" class="hover:underline"> Followers {{ user.followes ?? 0 }} </NuxtLink>
+      <NuxtLink href="#" class="hover:underline"> Followers {{ user.followers ?? 0 }} </NuxtLink>
     </p>
   </Card>
 </template>

@@ -1,64 +1,69 @@
 import type { User, Post, Pagination } from '~/types';
 
+const parseUserPostsResponse = (response: any): { posts: Post[]; pagination: Pagination | null } => {
+  let posts: Post[] = [];
+  let pagination: Pagination | null = null;
+
+  const data = response?.data;
+  if (data) {
+    if (Array.isArray(data.posts)) {
+      posts = data.posts;
+    }
+    if (data.pagination) {
+      pagination = data.pagination;
+    }
+  }
+
+  return { posts, pagination };
+};
+
 export const useUser = () => {
+  const { get } = useApi();
   const client = useSanctumClient();
-  const route = useRoute();
-  
+
   const getUser = async (username: string): Promise<User | null> => {
-    try {
-      const _user = useSanctumUser<any>();
-      if (_user.value?.username === username) {
-        return _user.value as User;
-      }
-
-      const response = await client(`/api/v1/users/${username}`);
-      return response.data?.user ?? null;
-    } catch (err) {
-      const error = useApiError(err);
-      console.log(error.code);
-      return null;
-    }
+    const { data, error } = await get<{ user: User }>(`/api/v1/users/${username}`);
+    if (error) return null;
+    return data?.user ?? null;
   };
 
-  const getUserPosts = async (username: string, page: number = 1): Promise<{ posts: Post[]; pagination: Pagination | null }> => {
+  const getUserPosts = async (username: string, page: number = 1) => {
     try {
-      const response: any = await client(`/api/v1/me/posts?page=${page}`, {
-        credentials: "include",
-      });
-      
+      const response: any = await client(`/api/v1/me/posts?page=${page}`);
       return parseUserPostsResponse(response);
     } catch (err) {
-      console.log(err);
-      const error = useApiError(err);
-      if (error.isValidationError || error.isNotFoundError) {
-        throw error.bag;
+      const apiError = useApiError(err);
+      if (apiError.isValidationError || apiError.isNotFoundError) {
+        throw apiError.bag;
       }
       return { posts: [], pagination: null };
     }
   };
 
-  const getUserAndPosts = async (username: string, page: number = 1): Promise<{ posts: Post[]; pagination: Pagination | null }> => {
-    try {
-      const response: any = await client(`/api/v1/users/${username}/posts?page=${page}`, {
-        credentials: "include",
-      });
-      
-      return parseUserPostsResponse(response);
-    } catch (err) {
-      console.log(err);
-      const error = useApiError(err);
-      if (error.isValidationError || error.isNotFoundError) {
-        throw error.bag;
+  const getUserAndPosts = async (username: string, page: number = 1) => {
+    const { data, error } = await get<{
+      user: User;
+      posts: Post[];
+      pagination: Pagination;
+    }>(`/api/v1/users/${username}/posts?page=${page}`);
+
+    if (error) {
+      const apiError = useApiError(error);
+      if (apiError.isValidationError || apiError.isNotFoundError) {
+        throw apiError.bag;
       }
       return { posts: [], pagination: null };
     }
+
+    return {
+      posts: data?.posts ?? [],
+      pagination: data?.pagination ?? null,
+    };
   };
 
-  const getMyReposts = async (page: number = 1): Promise<{ posts: Post[]; pagination: Pagination | null }> => {
+  const getMyReposts = async (page: number = 1) => {
     try {
-      const response: any = await client(`/api/v1/me/reposts?page=${page}`, {
-        credentials: "include",
-      });
+      const response: any = await client(`/api/v1/me/reposts?page=${page}`);
       return parseUserPostsResponse(response);
     } catch (err) {
       console.error(err);
@@ -66,17 +71,21 @@ export const useUser = () => {
     }
   };
 
-  const getUserReposts = async (username: string, page: number = 1): Promise<{ posts: Post[]; pagination: Pagination | null }> => {
-    try {
-      const response: any = await client(
-        `/api/v1/users/${username}/reposts?page=${page}`,
-        { credentials: "include" },
-      );
-      return parseUserPostsResponse(response);
-    } catch (err) {
-      console.error(err);
+  const getUserReposts = async (username: string, page: number = 1) => {
+    const { data, error } = await get<{
+      posts: Post[];
+      pagination: Pagination;
+    }>(`/api/v1/users/${username}/reposts?page=${page}`);
+
+    if (error) {
+      console.error(error);
       return { posts: [], pagination: null };
     }
+
+    return {
+      posts: data?.posts ?? [],
+      pagination: data?.pagination ?? null,
+    };
   };
 
   return {
@@ -86,28 +95,4 @@ export const useUser = () => {
     getMyReposts,
     getUserReposts,
   };
-};
-
-const parseUserPostsResponse = (response: any): { posts: Post[]; pagination: Pagination | null } => {
-  let posts: Post[] = [];
-  let pagination: Pagination | null = null;
-
-  const data = response?.data;
-  if (data) {
-    if (data.posts) {
-      if (data.posts.data && Array.isArray(data.posts.data)) {
-        posts = data.posts.data;
-      } else if (Array.isArray(data.posts)) {
-        posts = data.posts;
-      }
-      if (data.posts.current_page) {
-        pagination = data.posts;
-      }
-    }
-    if (data.pagination) {
-      pagination = data.pagination;
-    }
-  }
-
-  return { posts, pagination };
 };

@@ -1,80 +1,47 @@
 import type { Comment } from '~/types';
 
 export const useComment = () => {
-  const client = useSanctumClient();
+  const { get, post, del } = useApi();
 
-  const getComments = async (postId: string | number): Promise<{data: Comment[]; error: string | null}> => {
-    try {
-      const response: any = await client(`/api/v1/posts/${postId}/comments`);
-      return { data: response.data?.comments ?? [], error: null };
-    } catch (err: any) {
-      console.error('Failed to fetch comments:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch comments';
-      return { data: [], error: errorMessage };
-    }
+  const getComments = async (postId: string | number) => {
+    const { data, error } = await get<{ comments: Comment[] }>(
+      `/api/v1/posts/${postId}/comments`,
+    );
+    return { data: data?.comments ?? [], error };
   };
 
-  const createComment = async (postId: string | number, content: string, parentId?: string): Promise<{data: Comment | null; error: string | null}> => {
-    try {
-      const body: { content: string; parent_id?: string } = { content };
-      if (parentId) {
-        body.parent_id = parentId;
-      }
+  const createComment = async (
+    postId: string | number,
+    content: string,
+    parentId?: string,
+  ) => {
+    const body: { content: string; parent_id?: string } = { content };
+    if (parentId) body.parent_id = parentId;
 
-      const response: any = await client(`/api/v1/posts/${postId}/comments`, {
-        method: 'POST',
-        body,
-      });
-      return { data: response.data?.comment ?? null, error: null };
-    } catch (err: any) {
-      console.error('Failed to create comment:', err);
-      const errorMessage = err.response?.data?.message || err.response?.data?.errors?.content?.[0] || err.message || 'Failed to create comment';
-      return { data: null, error: errorMessage };
-    }
+    const { data, error } = await post<{ comment: Comment }>(
+      `/api/v1/posts/${postId}/comments`,
+      body,
+    );
+    return { data: data?.comment ?? null, error };
   };
 
-  const deleteComment = async (commentId: string | number): Promise<{success: boolean; error: string | null}> => {
-    try {
-      await client(`/api/v1/comments/${commentId}`, {
-        method: 'DELETE',
-      });
-      return { success: true, error: null };
-    } catch (err: any) {
-      console.error('Failed to delete comment:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to delete comment';
-      return { success: false, error: errorMessage };
-    }
+  const deleteComment = async (commentId: string | number) => {
+    return del(`/api/v1/comments/${commentId}`);
   };
 
-  const getReplies = async (commentId: string | number): Promise<{data: Comment[]; error: string | null}> => {
-    try {
-      const response: any = await client(`/api/v1/comments/${commentId}/replies`);
-      return { data: response.data?.replies ?? [], error: null };
-    } catch (err: any) {
-      console.error('Failed to fetch replies:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch replies';
-      return { data: [], error: errorMessage };
-    }
+  const getReplies = async (commentId: string | number) => {
+    const { data, error } = await get<{ replies: Comment[] }>(
+      `/api/v1/comments/${commentId}/replies`,
+    );
+    return { data: data?.replies ?? [], error };
   };
 
-  /** Full flat thread (all nested levels) under one top-level comment */
-  const getCommentThread = async (commentId: string | number): Promise<{ data: Comment[]; error: string | null }> => {
-    try {
-      const response: any = await client(`/api/v1/comments/${commentId}/thread`);
-      return { data: response.data?.thread ?? [], error: null };
-    } catch (err: any) {
-      console.error('Failed to fetch comment thread:', err);
-      const errorMessage =
-        err.response?.data?.message || err.message || 'Failed to fetch comment thread';
-      return { data: [], error: errorMessage };
-    }
+  const getCommentThread = async (commentId: string | number) => {
+    const { data, error } = await get<{ thread: Comment[] }>(
+      `/api/v1/comments/${commentId}/thread`,
+    );
+    return { data: data?.thread ?? [], error };
   };
 
-  return {
-    getComments,
-    createComment,
-    deleteComment,
-    getReplies,
-    getCommentThread,
-  };
+  return { getComments, createComment, deleteComment, getReplies, getCommentThread };
 };

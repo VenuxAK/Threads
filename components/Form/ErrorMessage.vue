@@ -1,11 +1,13 @@
 <template>
-  <span :class="['error-msg', error ? 'visible' : 'invisible']">
-    {{ error ?? "Error" }}
+  <span v-if="error" class="error-msg">
+    {{ error }}
   </span>
 </template>
 
 <script setup lang="ts">
-const props = defineProps(["error"]);
+defineProps<{
+  error?: string | null;
+}>();
 </script>
 
 <style scoped lang="scss">

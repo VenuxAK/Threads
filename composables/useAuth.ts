@@ -1,13 +1,11 @@
-import { usePostsStore } from "~/stores/posts";
+import { useInteractionsStore } from "~/stores/interactions";
 
 export const useAuth = () => {
   const client = useSanctumClient();
   const { login, logout, refreshIdentity } = useSanctumAuth();
+  const _user: any = useSanctumUser();
 
-  const user = computed(() => {
-    const _user: any = useSanctumUser();
-    return _user.value?.data ?? null;
-  });
+  const user = computed(() => _user.value?.data ?? null);
 
   const signUp = async (name: string, email: string, password: string) => {
     try {
@@ -38,14 +36,13 @@ export const useAuth = () => {
   };
 
   const signOut = async () => {
-    const postsStore = usePostsStore();
+    const interactionsStore = useInteractionsStore();
     try {
       await logout();
     } catch (err) {
       console.log('Logout error:', err);
     } finally {
-      // Always clear liked posts, regardless of logout success/failure
-      postsStore.clearLikedPosts();
+      interactionsStore.clearLikedPosts();
     }
   };
 

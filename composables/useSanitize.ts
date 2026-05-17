@@ -1,26 +1,24 @@
 import DOMPurify from "dompurify";
+
 export const useSanitize = () => {
   const sanitize = (dirty: string): string => {
+    if (!import.meta.client) return dirty;
     return DOMPurify.sanitize(dirty, {
       ALLOWED_TAGS: ["br", "span"],
       ALLOWED_ATTR: ["style", "class"],
       ALLOW_DATA_ATTR: false,
     });
   };
+
   const sanitizeWithHashtags = (text: string): string => {
     if (!text) return '';
-    
-    // First escape HTML entities to prevent XSS
+    if (!import.meta.client) return text;
+
     const escapedText = DOMPurify.sanitize(text, { ALLOWED_TAGS: [] });
-    
-    // Extract hashtags from the original text (before escaping)
-    const hashtags = extractHashtags(text);
+    const hashtags = extractHashtags(escapedText);
     let formattedText = escapedText.replace(/\n/g, "<br>");
 
-    // Wrap hashtags in styled spans
-    // Use a more robust replacement to avoid issues with overlapping tags
     hashtags.forEach((tag) => {
-      // Escape the tag for regex
       const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const tagRegex = new RegExp(`#${escapedTag}(?![\\w#])`, "g");
       formattedText = formattedText.replace(
@@ -31,6 +29,7 @@ export const useSanitize = () => {
 
     return sanitize(formattedText);
   };
+
   const extractHashtags = (caption: string): string[] => {
     const hashtagRegex = /#(\w+)/g;
     const tags: string[] = [];
@@ -42,9 +41,6 @@ export const useSanitize = () => {
     }
     return tags;
   };
-  return {
-    sanitize,
-    sanitizeWithHashtags,
-    extractHashtags,
-  };
+
+  return { sanitize, sanitizeWithHashtags, extractHashtags };
 };

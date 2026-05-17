@@ -1,26 +1,17 @@
 export const useRepost = () => {
-  const client = useSanctumClient();
+  const { post } = useApi();
 
   const toggleRepost = async (postId: string | number) => {
-    try {
-      const response: any = await client(`/api/v1/posts/${postId}/repost`, {
-        method: "POST",
-      });
-      return {
-        success: true,
-        repostsCount: response.data?.reposts_count ?? 0,
-        reposted: response.data?.reposted ?? false,
-      };
-    } catch (err: any) {
-      console.error("Failed to repost:", err);
-      return {
-        success: false,
-        error: err.response?.data?.message || "Failed to repost",
-      };
-    }
+    const { data, error } = await post<{ reposts_count: number; reposted: boolean }>(
+      `/api/v1/posts/${postId}/repost`,
+    );
+    if (error) return { success: false, error };
+    return {
+      success: true,
+      repostsCount: data!.reposts_count,
+      reposted: data!.reposted,
+    };
   };
 
-  return {
-    toggleRepost,
-  };
+  return { toggleRepost };
 };

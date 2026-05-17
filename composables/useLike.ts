@@ -1,28 +1,17 @@
-import type { Post } from '~/types';
-
 export const useLike = () => {
-  const client = useSanctumClient();
+  const { post } = useApi();
 
   const likePost = async (postId: string | number) => {
-    try {
-      const response: any = await client(`/api/v1/posts/${postId}/like`, {
-        method: 'POST',
-      });
-      return {
-        success: true,
-        likesCount: response.data?.likes_count ?? 0,
-        liked: response.data?.liked ?? false,
-      };
-    } catch (err: any) {
-      console.error('Failed to like post:', err);
-      return {
-        success: false,
-        error: err.response?.data?.message || 'Failed to like post',
-      };
-    }
+    const { data, error } = await post<{ likes_count: number; liked: boolean }>(
+      `/api/v1/posts/${postId}/like`,
+    );
+    if (error) return { success: false, error };
+    return {
+      success: true,
+      likesCount: data!.likes_count,
+      liked: data!.liked,
+    };
   };
 
-  return {
-    likePost,
-  };
+  return { likePost };
 };

@@ -7,13 +7,13 @@ export interface User {
   email?: string;
   bio?: string;
   avatar?: string;
-  followes?: number;
+  followers?: number;
   following?: number;
   reposts?: Post[];
 }
 
 export interface Author {
-  id: number;
+  id: number | string;
   name: string;
   username: string;
   avatar?: string;

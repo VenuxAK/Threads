@@ -1,10 +1,9 @@
 <script lang="ts" setup>
-const props = defineProps({
-  post: {
-    required: true,
-    type: Object,
-  },
-});
+import type { Post } from '~/types';
+
+defineProps<{
+  post: Post;
+}>();
 </script>
 
 <template>

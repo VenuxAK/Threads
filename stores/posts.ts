@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import type { Post, Pagination } from '~/types';
+import { useInteractionsStore } from '~/stores/interactions';
 
 interface PostsState {
   posts: Post[];
@@ -9,8 +10,6 @@ interface PostsState {
   loading: boolean;
   loadingMore: boolean;
   error: string | null;
-  likedPosts: Set<string>;
-  repostedPosts: Set<string>;
 }
 
 export const usePostsStore = defineStore('posts', {
@@ -22,34 +21,18 @@ export const usePostsStore = defineStore('posts', {
     loading: false,
     loadingMore: false,
     error: null,
-    likedPosts: new Set<string>(),
-    repostedPosts: new Set<string>(),
   }),
-
-  hydrate(state) {
-    // Initialize with empty liked posts - backend will provide actual like state
-    state.likedPosts = new Set<string>();
-    state.repostedPosts = new Set<string>();
-  },
 
   getters: {
     hasPosts: (state) => state.posts.length > 0,
     isEmpty: (state) => state.posts.length === 0 && !state.loading,
-    isPostLiked: (state) => (postId: string) => state.likedPosts.has(postId.toString()),
-    isPostReposted: (state) => (postId: string) =>
-      state.repostedPosts.has(postId.toString()),
   },
 
   actions: {
     setPosts(posts: Post[], pagination: Pagination | null) {
       this.posts = posts;
-      posts.forEach((p) => {
-        if (p.is_reposted) {
-          this.repostedPosts.add(p.id.toString());
-        } else {
-          this.repostedPosts.delete(p.id.toString());
-        }
-      });
+      const interactions = useInteractionsStore();
+      interactions.syncFromPosts(posts);
       this.pagination = pagination;
       if (pagination) {
         this.hasMore = pagination.current_page < pagination.last_page;
@@ -61,13 +44,8 @@ export const usePostsStore = defineStore('posts', {
 
     appendPosts(newPosts: Post[], pagination: Pagination | null) {
       this.posts = [...this.posts, ...newPosts];
-      newPosts.forEach((p) => {
-        if (p.is_reposted) {
-          this.repostedPosts.add(p.id.toString());
-        } else {
-          this.repostedPosts.delete(p.id.toString());
-        }
-      });
+      const interactions = useInteractionsStore();
+      interactions.syncFromPosts(newPosts);
       this.pagination = pagination;
       if (pagination) {
         this.hasMore = pagination.current_page < pagination.last_page;
@@ -107,34 +85,6 @@ export const usePostsStore = defineStore('posts', {
       }
     },
 
-    toggleRepost(postId: string, reposted: boolean) {
-      if (reposted) {
-        this.repostedPosts.add(postId.toString());
-      } else {
-        this.repostedPosts.delete(postId.toString());
-      }
-      const postIndex = this.posts.findIndex(
-        (p) => p.id.toString() === postId.toString(),
-      );
-      if (postIndex !== -1 && this.posts[postIndex]) {
-        this.posts[postIndex].is_reposted = reposted;
-      }
-    },
-
-    toggleLike(postId: string, liked: boolean) {
-      if (liked) {
-        this.likedPosts.add(postId.toString());
-      } else {
-        this.likedPosts.delete(postId.toString());
-      }
-      const postIndex = this.posts.findIndex(
-        (p) => p.id.toString() === postId.toString(),
-      );
-      if (postIndex !== -1 && this.posts[postIndex]) {
-        this.posts[postIndex].is_liked = liked;
-      }
-    },
-
     setLoading(loading: boolean) {
       this.loading = loading;
     },
@@ -155,22 +105,6 @@ export const usePostsStore = defineStore('posts', {
       this.loading = false;
       this.loadingMore = false;
       this.error = null;
-      this.likedPosts.clear();
-      this.repostedPosts.clear();
-    },
-
-    clearLikedPosts() {
-      this.likedPosts.clear();
-    },
-
-    setLikedPosts(postIds: string[]) {
-      this.likedPosts = new Set(postIds);
-    },
-
-    checkAndSetLike(postId: string) {
-      // This method should be called after fetching posts to check like status from backend
-      // The backend API should include is_liked field in post responses
-      // For now, we'll keep it empty and rely on the backend to provide like status
     },
   },
 });

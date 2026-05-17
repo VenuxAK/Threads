@@ -27,12 +27,13 @@ definePageMeta({
 });
 
 const postsStore = usePostsStore();
+const interactionsStore = useInteractionsStore();
 const { loadPosts } = usePostList();
 
 const loading = ref(true);
 
 const likedPosts = computed<Post[]>(() => {
-  return postsStore.posts.filter(post => postsStore.isPostLiked(post.id.toString()));
+  return postsStore.posts.filter(post => interactionsStore.isPostLiked(post.id.toString()));
 });
 
 onMounted(async () => {

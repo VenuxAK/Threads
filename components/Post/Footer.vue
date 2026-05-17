@@ -11,18 +11,19 @@ const emit = defineEmits<{
 }>();
 
 const postsStore = usePostsStore();
+const interactionsStore = useInteractionsStore();
 const { likePost } = useLike();
 const { toggleRepost } = useRepost();
 
 // Track local like state (prioritize prop from API, fallback to store)
 const isLiked = ref(
-  props.post.is_liked ?? postsStore.isPostLiked(props.post.id.toString()),
+  props.post.is_liked ?? interactionsStore.isPostLiked(props.post.id.toString()),
 );
 const likesCount = ref(props.post.likes ?? 0);
 const isProcessing = ref(false);
 
 const isReposted = ref(
-  props.post.is_reposted ?? postsStore.isPostReposted(props.post.id.toString()),
+  props.post.is_reposted ?? interactionsStore.isPostReposted(props.post.id.toString()),
 );
 const repostsCount = ref(props.post.reposts ?? 0);
 const isRepostProcessing = ref(false);
@@ -70,18 +71,15 @@ const handleLike = async () => {
     if (result.success) {
       likesCount.value = result.likesCount;
       postsStore.updatePostLikes(props.post.id.toString(), result.likesCount);
-      // Sync with server state (toggle behavior)
       isLiked.value = result.liked;
-      postsStore.toggleLike(props.post.id.toString(), result.liked);
+      interactionsStore.toggleLike(props.post.id.toString(), result.liked);
     } else {
-      // Revert on error
       isLiked.value = wasLiked;
-      postsStore.toggleLike(props.post.id.toString(), wasLiked);
+      interactionsStore.toggleLike(props.post.id.toString(), wasLiked);
     }
   } catch (err) {
-    // Revert on error
     isLiked.value = wasLiked;
-    postsStore.toggleLike(props.post.id.toString(), wasLiked);
+    interactionsStore.toggleLike(props.post.id.toString(), wasLiked);
   } finally {
     isProcessing.value = false;
   }
@@ -115,7 +113,7 @@ const handleRepost = async () => {
         props.post.id.toString(),
         result.repostsCount,
       );
-      postsStore.toggleRepost(props.post.id.toString(), result.reposted);
+      interactionsStore.toggleRepost(props.post.id.toString(), result.reposted);
     } else {
       isReposted.value = wasReposted;
       repostsCount.value = Math.max(
