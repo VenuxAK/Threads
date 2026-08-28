@@ -22,7 +22,7 @@ const handleOpenComments = () => {
 </script>
 
 <template>
-  <Card class="post-card" v-if="post">
+  <Card class="post-card" v-if="post && post.content && post.author">
     <PostHeader :post="post" />
     <div class="card-content">
        <NuxtLink :href="post.author?.username ? `/@${post.author.username}/posts/${post.id}` : ''">

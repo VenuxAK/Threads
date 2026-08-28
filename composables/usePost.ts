@@ -8,9 +8,22 @@ const parsePostsResponse = (response: any): { posts: Post[]; pagination: Paginat
   if (data) {
     if (Array.isArray(data.posts)) {
       posts = data.posts;
+    } else if (data.posts && Array.isArray(data.posts.data)) {
+      posts = data.posts.data;
     }
+    posts = posts.filter((p: any) => p && p.id && p.content && String(p.content).trim().length > 0);
     if (data.pagination) {
       pagination = data.pagination;
+    } else if (data.posts && typeof data.posts === 'object') {
+      const p = data.posts;
+      if (typeof p.current_page === 'number') {
+        pagination = {
+          current_page: p.current_page,
+          last_page: p.last_page,
+          per_page: p.per_page,
+          total: p.total,
+        };
+      }
     }
   }
 
