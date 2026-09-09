@@ -17,6 +17,7 @@ export interface Post {
   reposts?: number;
   is_liked?: boolean;
   is_reposted?: boolean;
+  is_saved?: boolean;
   parent_id?: number | string;
   tags?: string[];
   interactions?: {

@@ -12,6 +12,9 @@ export const USER_FRAGMENT = `
     username
     avatar
     bio
+    followers_count
+    following_count
+    is_following
   }
 `;
 
@@ -28,6 +31,7 @@ export const POST_FRAGMENT = `
     reposts
     is_liked
     is_reposted
+    is_saved
     interactions {
       likes
       comments

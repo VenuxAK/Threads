@@ -29,6 +29,43 @@ if (!userData) {
 }
 
 const user = ref<User>(userData);
+const { followUser, unfollowUser } = useFollow();
+const isFollowing = ref(user.value.is_following ?? false);
+const followersCount = ref(user.value.followers_count ?? user.value.followers ?? 0);
+const followingCount = ref(user.value.following_count ?? user.value.following ?? 0);
+const isFollowProcessing = ref(false);
+
+const handleToggleFollow = async () => {
+  if (isFollowProcessing.value || authUser.value?.username === user.value.username) return;
+
+  isFollowProcessing.value = true;
+  const wasFollowing = isFollowing.value;
+
+  isFollowing.value = !wasFollowing;
+  followersCount.value = Math.max(0, followersCount.value + (wasFollowing ? -1 : 1));
+
+  try {
+    const result = wasFollowing
+      ? await unfollowUser(user.value.id)
+      : await followUser(user.value.id);
+
+    if (result.success) {
+      isFollowing.value = result.status;
+      followersCount.value = result.followersCount;
+      if (result.followingCount !== undefined) {
+        followingCount.value = result.followingCount;
+      }
+    } else {
+      isFollowing.value = wasFollowing;
+      followersCount.value = Math.max(0, followersCount.value + (wasFollowing ? 1 : -1));
+    }
+  } catch {
+    isFollowing.value = wasFollowing;
+    followersCount.value = Math.max(0, followersCount.value + (wasFollowing ? 1 : -1));
+  } finally {
+    isFollowProcessing.value = false;
+  }
+};
 
 const { posts, loading, loadingMore, hasMore, loadPosts, loadMore } = usePostList({
   fetchFn: async (page: number) => {
@@ -104,11 +141,13 @@ const toggleTab = async (t: 'posts' | 'reposts') => {
   tab.value = t;
 };
 
+let observer: IntersectionObserver | null = null;
+
 onMounted(async () => {
   await loadPosts();
 
   if (import.meta.client) {
-    const observer = new IntersectionObserver(
+    observer = new IntersectionObserver(
       (entries) => {
         if (!entries[0]?.isIntersecting) return;
         if (tab.value === 'posts') {
@@ -121,13 +160,15 @@ onMounted(async () => {
     );
 
     nextTick(() => {
-      if (loadTrigger.value) {
+      if (loadTrigger.value && observer) {
         observer.observe(loadTrigger.value);
       }
     });
-
-    onUnmounted(() => observer.disconnect());
   }
+});
+
+onUnmounted(() => {
+  observer?.disconnect();
 });
 </script>
 
@@ -157,12 +198,12 @@ onMounted(async () => {
             <div class="flex items-center space-x-3 text-sm">
               <div>
                 <button class="hover:underline">
-                  {{ user.followes ?? 0 }} followers
+                  {{ followersCount }} followers
                 </button>
               </div>
               <div>
                 <button class="hover:underline">
-                  {{ user.following ?? 0 }} following
+                  {{ followingCount }} following
                 </button>
               </div>
             </div>
@@ -177,8 +218,13 @@ onMounted(async () => {
           </button>
         </div>
         <div v-else>
-          <button class="w-full border dark:border-darkGray py-1.5 rounded-lg">
-            Follow
+          <button
+            :disabled="isFollowProcessing"
+            @click="handleToggleFollow"
+            class="w-full border dark:border-darkGray py-1.5 rounded-lg font-semibold transition-colors cursor-pointer"
+            :class="isFollowing ? 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/70 hover:border-red-500 hover:text-red-500' : 'bg-black text-white dark:bg-white dark:text-black'"
+          >
+            {{ isFollowing ? 'Following' : 'Follow' }}
           </button>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { POST_FRAGMENT, USER_FRAGMENT } from '~/graphql/fragments';
+import { POST_FRAGMENT } from '~/graphql/fragments';
 
 /**
  * GraphQL Query operations for searching across users and posts.
@@ -8,7 +8,6 @@ import { POST_FRAGMENT, USER_FRAGMENT } from '~/graphql/fragments';
  */
 
 export const SEARCH_QUERY = `
-  ${USER_FRAGMENT}
   ${POST_FRAGMENT}
   query Search($keyword: String!, $includePosts: Boolean, $page: Int, $perPage: Int) {
     search(keyword: $keyword, includePosts: $includePosts, page: $page, perPage: $perPage) {

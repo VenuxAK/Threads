@@ -119,12 +119,18 @@ const parentIdStr = computed(() => props.item.id.toString());
               :disabled="!replyContent.trim() || isSubmitting"
               @click="emit('submit-reply', parentIdStr)"
             >
-              <Icon
+              <svg
                 v-if="isSubmitting"
-                name="carbon:loader"
-                class="animate-spin inline"
-                size="18"
-              />
+                class="animate-spin inline text-current"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+              >
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
               <span v-else>Post</span>
             </button>
           </div>

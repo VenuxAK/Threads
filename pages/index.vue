@@ -24,11 +24,13 @@ const closeComments = () => {
   selectedPost.value = null;
 };
 
+let observer: IntersectionObserver | null = null;
+
 onMounted(async () => {
   await loadPosts();
 
   if (import.meta.client) {
-    const observer = new IntersectionObserver(
+    observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
           loadMore();
@@ -38,13 +40,15 @@ onMounted(async () => {
     );
 
     nextTick(() => {
-      if (loadTrigger.value) {
+      if (loadTrigger.value && observer) {
         observer.observe(loadTrigger.value);
       }
     });
-
-    onUnmounted(() => observer.disconnect());
   }
+});
+
+onUnmounted(() => {
+  observer?.disconnect();
 });
 
 const handleNewPost = (newPost: Post) => {

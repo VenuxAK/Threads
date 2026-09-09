@@ -4,23 +4,28 @@ import type { Post } from '~/types';
 interface InteractionsState {
   likedPosts: Set<string>;
   repostedPosts: Set<string>;
+  savedPosts: Set<string>;
 }
 
 export const useInteractionsStore = defineStore('interactions', {
   state: (): InteractionsState => ({
     likedPosts: new Set<string>(),
     repostedPosts: new Set<string>(),
+    savedPosts: new Set<string>(),
   }),
 
   hydrate(state) {
     state.likedPosts = new Set<string>();
     state.repostedPosts = new Set<string>();
+    state.savedPosts = new Set<string>();
   },
 
   getters: {
     isPostLiked: (state) => (postId: string) => state.likedPosts.has(postId.toString()),
     isPostReposted: (state) => (postId: string) =>
       state.repostedPosts.has(postId.toString()),
+    isPostSaved: (state) => (postId: string) =>
+      state.savedPosts.has(postId.toString()),
   },
 
   actions: {
@@ -36,6 +41,11 @@ export const useInteractionsStore = defineStore('interactions', {
           this.likedPosts.add(id);
         } else {
           this.likedPosts.delete(id);
+        }
+        if (p.is_saved) {
+          this.savedPosts.add(id);
+        } else {
+          this.savedPosts.delete(id);
         }
       });
     },
@@ -56,13 +66,26 @@ export const useInteractionsStore = defineStore('interactions', {
       }
     },
 
+    toggleSave(postId: string, saved: boolean) {
+      if (saved) {
+        this.savedPosts.add(postId.toString());
+      } else {
+        this.savedPosts.delete(postId.toString());
+      }
+    },
+
     clearLikedPosts() {
       this.likedPosts.clear();
+    },
+
+    clearSavedPosts() {
+      this.savedPosts.clear();
     },
 
     clear() {
       this.likedPosts.clear();
       this.repostedPosts.clear();
+      this.savedPosts.clear();
     },
   },
 });

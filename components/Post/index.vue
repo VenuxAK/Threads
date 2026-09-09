@@ -11,13 +11,18 @@ const emit = defineEmits<{
 }>();
 
 const { sanitizeWithHashtags } = useSanitize();
+const repliedRef = ref<{ focusInput?: () => void } | null>(null);
 
 const formattedCaption = computed(() => {
   return sanitizeWithHashtags(props.post.content);
 });
 
 const handleOpenComments = () => {
-  emit('openComments');
+  if (props.showReplied && repliedRef.value?.focusInput) {
+    repliedRef.value.focusInput();
+  } else {
+    emit('openComments');
+  }
 };
 </script>
 
@@ -30,7 +35,7 @@ const handleOpenComments = () => {
       </NuxtLink>
     </div>
     <PostFooter :post="post" @open-comments="handleOpenComments" />
-    <PostReplied v-if="showReplied" />
+    <PostReplied v-if="showReplied" ref="repliedRef" :post="post" />
   </Card>
 </template>
 

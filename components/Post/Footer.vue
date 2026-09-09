@@ -14,6 +14,7 @@ const postsStore = usePostsStore();
 const interactionsStore = useInteractionsStore();
 const { likePost } = useLike();
 const { toggleRepost } = useRepost();
+const { toggleSavePost } = useSavePost();
 
 // Track local like state (prioritize prop from API, fallback to store)
 const isLiked = ref(
@@ -27,6 +28,11 @@ const isReposted = ref(
 );
 const repostsCount = ref(props.post.reposts ?? 0);
 const isRepostProcessing = ref(false);
+
+const isSaved = ref(
+  props.post.is_saved ?? interactionsStore.isPostSaved(props.post.id.toString()),
+);
+const isSaveProcessing = ref(false);
 
 // Sync local state when prop changes (e.g., after page refresh)
 watch(
@@ -43,6 +49,15 @@ watch(
   (newVal) => {
     if (newVal !== undefined) {
       isReposted.value = newVal;
+    }
+  },
+);
+
+watch(
+  () => props.post.is_saved,
+  (newVal) => {
+    if (newVal !== undefined) {
+      isSaved.value = newVal;
     }
   },
 );
@@ -131,13 +146,36 @@ const handleRepost = async () => {
     isRepostProcessing.value = false;
   }
 };
+
+const handleSave = async () => {
+  if (isSaveProcessing.value) return;
+
+  isSaveProcessing.value = true;
+  const wasSaved = isSaved.value;
+
+  // Optimistic UI update
+  isSaved.value = !wasSaved;
+  interactionsStore.toggleSave(props.post.id.toString(), !wasSaved);
+
+  try {
+    const success = await toggleSavePost(props.post.id, wasSaved);
+    if (!success) {
+      isSaved.value = wasSaved;
+      interactionsStore.toggleSave(props.post.id.toString(), wasSaved);
+    }
+  } catch {
+    isSaved.value = wasSaved;
+    interactionsStore.toggleSave(props.post.id.toString(), wasSaved);
+  } finally {
+    isSaveProcessing.value = false;
+  }
+};
 </script>
 
 <template>
   <div class="card-footer">
     <div>
-      <!-- :class="{ 'text-red-500': isLiked }" -->
-      <button :disabled="isProcessing" @click="handleLike">
+      <button :disabled="isProcessing" @click="handleLike" title="Like">
         <Icon
           :name="isLiked ? 'ph:heart-fill' : 'ph:heart-bold'"
           size="17px"
@@ -147,7 +185,7 @@ const handleRepost = async () => {
       </button>
     </div>
     <div>
-      <button @click="handleOpenComments">
+      <button @click="handleOpenComments" title="Comments">
         <Icon name="ph:chat-circle-bold" size="17px" />
         <span>{{ post?.comments ?? "" }}</span>
       </button>
@@ -156,6 +194,7 @@ const handleRepost = async () => {
       <button
         :disabled="isRepostProcessing"
         @click="handleRepost"
+        title="Repost"
       >
         <Icon
           name="ph:repeat-bold"
@@ -165,9 +204,15 @@ const handleRepost = async () => {
         <span>{{ repostsCount }}</span>
       </button>
     </div>
-    <!-- <div>
-      <Icon name="ph:paper-plane-right-bold" size="17px" />
-    </div> -->
+    <div>
+      <button :disabled="isSaveProcessing" @click="handleSave" title="Bookmark">
+        <Icon
+          :name="isSaved ? 'ph:bookmark-simple-fill' : 'ph:bookmark-simple-bold'"
+          size="17px"
+          :class="{ 'text-amber-500': isSaved }"
+        />
+      </button>
+    </div>
   </div>
 </template>
 

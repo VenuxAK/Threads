@@ -6,6 +6,10 @@ import { LIKE_POST_MUTATION } from '~/graphql/mutations/interactions';
  * Dispatches the LikePost GraphQL mutation to atomically toggle like state
  * in the MySQL backend, returning updated counters for optimistic UI synchronizations.
  */
+export type LikeResult =
+  | { success: true; likesCount: number; liked: boolean }
+  | { success: false; error: string; likesCount?: never; liked?: never };
+
 export const useLike = () => {
   const { mutate } = useGraphQL();
 
@@ -15,7 +19,7 @@ export const useLike = () => {
    * @param postId The ID of the post to like or unlike.
    * @returns Object containing success status, updated likesCount, and boolean liked flag.
    */
-  const likePost = async (postId: string | number) => {
+  const likePost = async (postId: string | number): Promise<LikeResult> => {
     const { data, error } = await mutate<{
       likePost: {
         count: number;

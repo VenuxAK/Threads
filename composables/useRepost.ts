@@ -6,6 +6,10 @@ import { REPOST_MUTATION } from '~/graphql/mutations/interactions';
  * Dispatches the Repost mutation to toggle the repost relationship in MySQL,
  * returning the new repost counter and active boolean status.
  */
+export type RepostResult =
+  | { success: true; repostsCount: number; reposted: boolean }
+  | { success: false; error: string; repostsCount?: never; reposted?: never };
+
 export const useRepost = () => {
   const { mutate } = useGraphQL();
 
@@ -15,7 +19,7 @@ export const useRepost = () => {
    * @param postId The ID of the post to repost or un-repost.
    * @returns Object containing success status, updated repostsCount, and boolean reposted flag.
    */
-  const toggleRepost = async (postId: string | number) => {
+  const toggleRepost = async (postId: string | number): Promise<RepostResult> => {
     const { data, error } = await mutate<{
       repost: {
         count: number;

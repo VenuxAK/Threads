@@ -122,7 +122,9 @@ const fetchComments = async () => {
 };
 
 const handleSubmitComment = async () => {
-  if (!newComment.value.trim()) return;
+  if (isSubmitting.value) return;
+  const content = newComment.value.trim();
+  if (!content) return;
 
   // Check if user is authenticated
   if (!auth.user?.value) {
@@ -132,31 +134,38 @@ const handleSubmitComment = async () => {
 
   isSubmitting.value = true;
   errorMessage.value = null;
-  const { data: comment, error } = await createComment(
-    props.post.id,
-    newComment.value.trim(),
-  );
+  newComment.value = "";
 
-  if (comment) {
-    comments.value.unshift({
-      ...comment,
-      showReplies: false,
-      threadItems: undefined,
-    });
-    newComment.value = "";
+  try {
+    const { data: comment, error } = await createComment(
+      props.post.id,
+      content,
+    );
 
-    // Update comment count in store
-    const currentCount = props.post.comments || 0;
-    postsStore.updatePostComments(props.post.id.toString(), currentCount + 1);
-  } else if (error) {
-    errorMessage.value = error;
-    console.error("Error creating comment:", error);
+    if (comment) {
+      comments.value.unshift({
+        ...comment,
+        showReplies: false,
+        threadItems: undefined,
+      });
+
+      // Update comment count in store
+      const currentCount = props.post.comments || 0;
+      postsStore.updatePostComments(props.post.id.toString(), currentCount + 1);
+    } else if (error) {
+      newComment.value = content;
+      errorMessage.value = error;
+      console.error("Error creating comment:", error);
+    }
+  } finally {
+    isSubmitting.value = false;
   }
-  isSubmitting.value = false;
 };
 
 const handleSubmitReply = async (parentId: string) => {
-  if (!replyContent.value.trim()) return;
+  if (isSubmitting.value) return;
+  const content = replyContent.value.trim();
+  if (!content) return;
 
   // Check if user is authenticated
   if (!auth.user?.value) {
@@ -166,47 +175,51 @@ const handleSubmitReply = async (parentId: string) => {
 
   isSubmitting.value = true;
   replyErrorMessage.value = null;
-  const { data: comment, error } = await createComment(
-    props.post.id,
-    replyContent.value.trim(),
-    parentId,
-  );
 
-  if (comment) {
-    const root = findThreadRoot(parentId);
-    if (root) {
-      if (!root.threadItems) {
-        root.threadItems = [];
+  try {
+    const { data: comment, error } = await createComment(
+      props.post.id,
+      content,
+      parentId,
+    );
+
+    if (comment) {
+      const root = findThreadRoot(parentId);
+      if (root) {
+        if (!root.threadItems) {
+          root.threadItems = [];
+        }
+
+        const parentAuthor = resolveParentAuthor(root, parentId);
+        const replyTargetLabel =
+          root.id.toString() !== parentId && parentAuthor
+            ? { username: parentAuthor.username }
+            : undefined;
+
+        root.threadItems.push({
+          ...comment,
+          reply_count: 0,
+          replying_to: replyTargetLabel ?? null,
+        });
+
+        root.showReplies = true;
+        root.reply_count = (root.reply_count || 0) + 1;
+
+        delete replyErrors.value[parentId];
+
+        replyContent.value = "";
+        replyingTo.value = null;
+
+        const currentCount = props.post.comments || 0;
+        postsStore.updatePostComments(props.post.id.toString(), currentCount + 1);
       }
-
-      const parentAuthor = resolveParentAuthor(root, parentId);
-      const replyTargetLabel =
-        root.id.toString() !== parentId && parentAuthor
-          ? { username: parentAuthor.username }
-          : undefined;
-
-      root.threadItems.push({
-        ...comment,
-        reply_count: 0,
-        replying_to: replyTargetLabel ?? null,
-      });
-
-      root.showReplies = true;
-      root.reply_count = (root.reply_count || 0) + 1;
-
-      delete replyErrors.value[parentId];
-
-      replyContent.value = "";
-      replyingTo.value = null;
-
-      const currentCount = props.post.comments || 0;
-      postsStore.updatePostComments(props.post.id.toString(), currentCount + 1);
+    } else if (error) {
+      replyErrorMessage.value = error;
+      console.error("Error creating reply:", error);
     }
-  } else if (error) {
-    replyErrorMessage.value = error;
-    console.error("Error creating reply:", error);
+  } finally {
+    isSubmitting.value = false;
   }
-  isSubmitting.value = false;
 };
 
 const handleDeleteComment = async (commentId: string) => {
@@ -496,12 +509,18 @@ const handleTabKey = (e: KeyboardEvent) => {
                       :disabled="isLoadingReply(comment.id.toString())"
                       @click="toggleShowReplies(comment.id.toString())"
                     >
-                      <Icon
+                      <svg
                         v-if="isLoadingReply(comment.id.toString())"
-                        name="carbon:loader"
-                        size="14"
-                        class="animate-spin"
-                      />
+                        class="animate-spin inline text-current"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        width="14"
+                        height="14"
+                      >
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                      </svg>
                       <template v-else>
                         <span class="text-lightGray">View</span>
                         <span class="text-gray-800 dark:text-gray-100">{{
@@ -567,12 +586,18 @@ const handleTabKey = (e: KeyboardEvent) => {
                         :disabled="!replyContent.trim() || isSubmitting"
                         @click="handleSubmitReply(comment.id.toString())"
                       >
-                        <Icon
+                        <svg
                           v-if="isSubmitting"
-                          name="carbon:loader"
-                          class="animate-spin inline"
-                          size="18"
-                        />
+                          class="animate-spin inline text-current"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          width="18"
+                          height="18"
+                        >
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
                         <span v-else>Post</span>
                       </button>
                     </div>
@@ -671,19 +696,24 @@ const handleTabKey = (e: KeyboardEvent) => {
               autocomplete="off"
               placeholder="Add a comment…"
               class="flex-1 min-w-0 bg-transparent py-2.5 text-[14px] text-gray-900 dark:text-white placeholder:text-lightGray focus:outline-none"
-              @keyup.enter="handleSubmitComment"
             />
             <button
               type="submit"
-              class="shrink-0 py-2 px-1 text-sm font-semibold text-blue-600 dark:text-blue-400 disabled:opacity-30 disabled:pointer-events-none min-w-[44px] min-h-[44px] rounded-full hover:bg-white/50 dark:hover:bg-white/[0.04] active:scale-95 transition-transform"
+              class="shrink-0 py-2 px-1 text-sm font-semibold text-blue-600 dark:text-blue-400 disabled:opacity-30 disabled:pointer-events-none min-w-[44px] min-h-[44px] rounded-full hover:bg-white/50 dark:hover:bg-white/[0.04] active:scale-95 transition-transform flex items-center justify-center"
               :disabled="!newComment.trim() || isSubmitting"
             >
-              <Icon
+              <svg
                 v-if="isSubmitting"
-                name="carbon:loader"
-                class="animate-spin inline"
-                size="20"
-              />
+                class="animate-spin inline text-current"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+              >
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
               <span v-else>Post</span>
             </button>
           </div>

@@ -42,12 +42,12 @@
               Settings
             </button>
           </HeadlessMenuItem>
-          <HeadlessMenuItem v-slot="{ active, close }" v-if="width < 640">
+          <HeadlessMenuItem v-slot="{ active, close }">
             <button class="menu-item" @click="handleClose(close, '/saved')">
               Saved
             </button>
           </HeadlessMenuItem>
-          <HeadlessMenuItem v-slot="{ active, close }" v-if="width < 640">
+          <HeadlessMenuItem v-slot="{ active, close }">
             <button class="menu-item" @click="handleClose(close, '/liked')">
               Your likes
             </button>

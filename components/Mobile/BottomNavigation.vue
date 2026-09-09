@@ -1,6 +1,14 @@
 <script lang="ts" setup>
 const user = useSanctumUser<{ username?: string }>();
 
+const { unreadCount, fetchUnreadCount } = useNotification();
+
+onMounted(() => {
+  if (user.value) {
+    fetchUnreadCount();
+  }
+});
+
 const items = computed(() => {
   const username = user.value?.username ?? "";
   const base = [
@@ -56,7 +64,15 @@ const items = computed(() => {
         :href="item.link"
         :class="item.class"
       >
-        <Icon :name="item.icon" size="25px" />
+        <div class="relative inline-flex items-center justify-center">
+          <Icon :name="item.icon" size="25px" />
+          <span
+            v-if="item.name === 'Notifications' && unreadCount > 0"
+            class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-bold rounded-full h-3.5 min-w-[14px] px-1 flex items-center justify-center shadow-sm"
+          >
+            {{ unreadCount > 99 ? '99+' : unreadCount }}
+          </span>
+        </div>
       </NuxtLink>
     </div>
   </div>
