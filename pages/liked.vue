@@ -22,23 +22,30 @@
 <script lang="ts" setup>
 import type { Post } from '~/types';
 
+/**
+ * Liked Posts View.
+ *
+ * Fetches the authenticated user's liked posts via the GraphQL `myLikedPosts` query.
+ * Replaces the previous client-side memory filter with a true server-backed query.
+ */
 definePageMeta({
   middleware: "sanctum:auth",
 });
 
-const postsStore = usePostsStore();
-const interactionsStore = useInteractionsStore();
-const { loadPosts } = usePostList();
-
+const { getMyLikedPosts } = useUser();
 const loading = ref(true);
-
-const likedPosts = computed<Post[]>(() => {
-  return postsStore.posts.filter(post => interactionsStore.isPostLiked(post.id.toString()));
-});
+const likedPosts = ref<Post[]>([]);
 
 onMounted(async () => {
-  await loadPosts();
-  loading.value = false;
+  loading.value = true;
+  try {
+    const result = await getMyLikedPosts(1);
+    likedPosts.value = result.posts;
+  } catch (err) {
+    console.error('Failed to load liked posts:', err);
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
 
